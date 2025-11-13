@@ -1,0 +1,93 @@
+.login-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  height: 100vh;
+}
+
+.left-panel {
+  background: #212529; /* Azul muy oscuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.left-panel .logo-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.logo-box img {
+  max-width: 80%;   /* logo un poco más grande */
+  height: auto;     /* mantiene proporción */
+}
+
+.right-panel {
+  background: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+}
+
+.right-panel h2 {
+  text-align: center;    /* centra horizontalmente */
+  margin-top: -120px;     /* lo sube un poco hacia arriba */
+  margin-bottom: 100px;   /* espacio con los inputs */
+  font-size: 50px;
+  font-weight: 600;
+}
+
+/* Ajustes para inputs con labels flotantes */
+mat-form-field.full-width {
+  width: 100%;
+  margin-bottom: 25px;   /* más espacio entre campos */
+  
+}
+
+mat-form-field.full-width .mat-form-field-label {
+  font-weight: 500;      /* opcional: label más visible */
+  
+}
+
+mat-form-field.full-width input.mat-input-element {
+  padding: 12px 10px;    /* más cómodo para escribir */
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 900px) {
+  .login-container {
+    grid-template-columns: 1fr;
+  }
+  .left-panel {
+    display: none;
+  }
+}
+
+.login-btn {
+  background-color: #212529;  /* fondo negro */
+  color: #f5f5f5;             /* texto blanco */
+  height: 50px;               /* altura del botón */
+  font-size: 20px;            /* tamaño del texto */
+  border-radius: 8px;         /* bordes redondeados */
+  font-weight: 600;           /* grosor del texto */
+  transition: all 0.3s ease; /* transición suave al hover */
+  margin-top: 40px;
+  font-family: 'Bebas Neue', sans-serif !important;
+  margin-left: 170px;
+}
+
+.login-btn:hover {
+  background-color: #108767; /* color de fondo al pasar el mouse */
+  color: #000000;            /* color del texto al hover */
+}
+
+
+

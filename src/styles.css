@@ -1,1 +1,15 @@
-/* You can add global styles to this file, and also import other style files */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif !important;
+}
+
+body, 
+.mat-typography, 
+.mat-form-field, 
+.mat-form-field-label, 
+.mat-input-element, 
+button.mat-raised-button, 
+button.mat-button {
+  font-family: 'Bebas Neue', sans-serif !important;
+}
