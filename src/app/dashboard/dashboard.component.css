@@ -1,0 +1,64 @@
+.pos-window {
+  display: grid;
+  grid-template-rows: 1fr 3fr;
+  height: 100vh;
+  width: 100%;
+}
+
+/* ------------------- BARRA SUPERIOR -------------------- */
+.top-bar {
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 🔥 Distribuye todo el espacio de forma uniforme */
+  padding: 20px 50px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Iconos de la barra superior */
+.bar-icon {
+  width: 80px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.bar-icon:hover {
+  transform: scale(1.2);
+}
+
+/* Icono especial */
+.noti-icon {
+  width: 120px;
+}
+
+
+/* ------------------- SECCIÓN INFERIOR -------------------- */
+.bottom-area {
+  background: #212529; /* Azul oscuro del login */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-container img {
+  max-width: 120%;
+  height: auto;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+}
+
+/* Ícono de ajustes en esquina inferior derecha */
+.settings-icon {
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+  font-size: 50px;
+  cursor: pointer;
+  color: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.settings-icon:hover {
+  transform: rotate(25deg) scale(1.1);
+}

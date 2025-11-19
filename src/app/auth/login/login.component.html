@@ -2,19 +2,12 @@
 
   <div class="left-panel">
     <div class="logo-box">
-      <!-- Aquí va tu logo real después -->
       <img src="assets/logoC.png" alt="Logo">
-
-
-
-
-
     </div>
   </div>
 
   <div class="right-panel">
     <h2>INICIO DE<br>SESIÓN</h2>
-
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
@@ -28,10 +21,9 @@
         <input matInput type="password" formControlName="password">
       </mat-form-field>
 
-      <button  class="login-btn" type="submit">
-  Ingresar
-</button>
-
+      <button class="login-btn" type="submit">
+        Ingresar
+      </button>
 
     </form>
   </div>
