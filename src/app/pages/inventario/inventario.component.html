@@ -1,0 +1,106 @@
+<!-- referencia: /mnt/data/7efa8a46-6add-4618-bc16-00309716f0c3.png -->
+<div class="inventory-page">
+
+  <!-- TOP BAR dark -->
+  <div class="top-bar">
+    <div class="top-left">
+      <img src="assets/logoC.png" alt="logo" class="logo">
+    </div>
+
+    <div class="top-center">
+      <div class="menu-inline">
+        <span class="menu-item" (click)="goTo('/dashboard')">Home</span>
+        <span class="menu-item" (click)="goTo('/caja')">Nueva Venta</span>
+        <span class="menu-item">Agregar Producto</span>
+        <span class="menu-item active">Inventario</span>
+        <span class="menu-item">Reportes</span>
+        <span class="menu-item">Notificaciones</span>
+      </div>
+
+      <div class="search-row">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" placeholder="Buscar producto...">
+          <!-- iconos a la derecha (simples) -->
+          <div class="search-tools">T | 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-right">
+      <div class="cajero-label">CAJERO:</div>
+      <div class="datetime">{{ fechaActual }} &nbsp; - &nbsp; {{ horaActual }}</div>
+    </div>
+  </div>
+
+  <!-- Main dark background area -->
+  <div class="main-area">
+
+    <!-- INVENTARIO HEADER + FILTERS -->
+    <div class="inventory-header">
+      <div class="inventory-title">
+        <div class="ico-red"><span>⌁</span></div>
+        <h1>Inventario</h1>
+      </div>
+
+      <div class="filters">
+        <button class="btn-filter" [class.active]="selectedFilter==='todos'" (click)="selectFilter('todos')">Todos</button>
+        <button class="btn-filter" [class.active]="selectedFilter==='bajo'" (click)="selectFilter('bajo')">Bajo Stock</button>
+        <button class="btn-filter" [class.active]="selectedFilter==='categoria'" (click)="openCategorias()">Categoría (Tornillería, Herramientas, Pinturas)</button>
+      </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="table-card">
+      <div class="table-head">
+        <div>Miniatura</div>
+        <div>Nombre de Producto</div>
+        <div>SKU</div>
+        <div>Precio</div>
+        <div>Stock</div>
+        <div>Acciones</div>
+      </div>
+
+      <div class="table-body">
+        <div class="table-row header-row">
+          <!-- header visually like mockup (left area) -->
+        </div>
+
+        <div class="row" *ngFor="let p of filtered">
+          <div class="cell thumb">
+            <img [src]="p.thumb || 'assets/productos/default.png'" alt="mini">
+          </div>
+          <div class="cell name">
+            <div class="small">Miniatura de la Imagento</div>
+            <div class="big">{{ p.nombre }}</div>
+          </div>
+          <div class="cell sku">{{ p.sku }}</div>
+          <div class="cell price">${{ p.precio.toFixed(2) }}</div>
+          <div class="cell stock" [class.low]="p.stock < 5">{{ p.stock }}</div>
+          <div class="cell actions">
+            <button class="link" (click)="editar(p)">Editar</button>
+            <button class="icon-del" (click)="eliminar(p)">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating add button -->
+    <button class="fab" title="Agregar Producto">+</button>
+
+  </div>
+
+  <!-- CATEGORIES MODAL -->
+  <div class="modal-backdrop" *ngIf="modalCategorias">
+    <div class="modal">
+      <h3>Seleccionar Categoría</h3>
+      <ul>
+        <li *ngFor="let c of categorias" (click)="filterByCategory(c)">{{ c }}</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn close" (click)="closeCategorias()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

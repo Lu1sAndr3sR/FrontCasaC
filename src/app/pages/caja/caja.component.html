@@ -1,0 +1,47 @@
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<div class="caja-container">
+
+  <!-- BARRA SUPERIOR -->
+  <div class="top-bar">
+    <img src="assets/logoC.png" class="logo" alt="logo">
+
+    <div class="top-info">
+      <span>CAJERO:</span>
+      <span>FECHA: {{ fechaActual }}</span>
+      <span>HORA: {{ horaActual }}</span>
+    </div>
+  </div>
+
+  <!-- BUSCADOR -->
+  <div class="search-bar">
+    <input type="text" placeholder="BUSCAR PRODUCTO">
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <!-- TABLA -->
+  <div class="table-container">
+
+    <div class="table-header">
+      <div>CÓDIGO</div>
+      <div>PRODUCTO</div>
+      <div>CANTIDAD</div>
+      <div>PRECIO</div>
+      <div>SUBTOTAL</div>
+      <div></div>
+    </div>
+
+    <div class="table-row" *ngFor="let item of filas">
+      <div></div><div></div><div></div><div></div><div></div><div></div>
+    </div>
+
+  </div>
+
+  <!-- BOTONES -->
+  <div class="buttons">
+    <button class="espera">EN ESPERA</button>
+    <button class="cancelar" (click)="cancelar()">CANCELAR</button>
+    <button class="cobrar" (click)="cobrar()">COBRAR</button>
+  </div>
+
+</div>

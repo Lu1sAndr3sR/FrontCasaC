@@ -4,6 +4,20 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
+
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent }
+
+  { path: 'dashboard', component: DashboardComponent },
+
+  {
+    path: 'caja',
+    loadComponent: () =>
+      import('./pages/caja/caja.component').then(m => m.CajaComponent)
+  },
+  { 
+  path: 'inventario', 
+  loadComponent: () => import('./pages/inventario/inventario.component')
+    .then(m => m.InventarioComponent) 
+}
+
 ];

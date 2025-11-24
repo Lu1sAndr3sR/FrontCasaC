@@ -2,13 +2,31 @@
 
   <!-- --- BARRA SUPERIOR (icons) --- -->
   <div class="top-bar">
-    <img src="assets/Caja.png" class="bar-icon" alt="caja">     <!-- Caja -->
-    <img src="assets/Venta.png" class="bar-icon" alt="venta">     <!-- Nueva venta -->
-    <img src="assets/Agregar.png" class="bar-icon" alt="agregar">      <!-- Agregar producto -->
-    <img src="assets/Inventario.png" class="bar-icon" alt="inventario">     <!-- Inventario -->
-    <img src="assets/Reportes.png" class="bar-icon" alt="reportes">     <!-- Reportes -->
-    <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti">    <!-- Notificaciones -->
-    <img src="assets\UserI.png" class="bar-icon" alt="useri">     <!-- Usuario -->
+
+    <!-- Caja (YA FUNCIONA EL CLICK) -->
+    <img src="assets/Caja.png" 
+         class="bar-icon" 
+         alt="caja" 
+         (click)="goCaja()">
+
+    <!-- Nueva venta -->
+    <img src="assets/Venta.png" class="bar-icon" alt="venta">
+
+    <!-- Agregar producto -->
+    <img src="assets/Agregar.png" class="bar-icon" alt="agregar">
+
+    <!-- Inventario -->
+    <img src="assets/Inventario.png" class="bar-icon" alt="inventario" (click)="goInventario()">
+
+    <!-- Reportes -->
+    <img src="assets/Reportes.png" class="bar-icon" alt="reportes">
+
+    <!-- Notificaciones -->
+    <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti">
+
+    <!-- Usuario -->
+    <img src="assets/UserI.png" class="bar-icon" alt="useri">
+
   </div>
 
   <!-- --- SECCIÓN INFERIOR (logo + ajustes) --- -->
