@@ -1,0 +1,110 @@
+* {
+  font-family: 'Oswald', sans-serif;
+}
+
+.caja-container {
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+}
+
+/* ---- BARRA SUPERIOR ---- */
+.top-bar {
+  background: #1e2227;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 90px;
+}
+
+.top-info {
+  color: white;
+  font-size: 20px;
+  display: flex;
+  gap: 60px;
+}
+
+/* ---- BUSCADOR ---- */
+.search-bar {
+  margin: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-bar input {
+  width: 250px;
+  height: 45px;
+  background: #efefef;
+  border: none;
+  padding-left: 15px;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.search-icon {
+  font-size: 28px;
+  cursor: pointer;
+}
+
+/* ---- TABLA ---- */
+.table-container {
+  margin: 20px;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 0.4fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.table-header div {
+  background: #e5e5e5;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.table-row div {
+  background: #ededed;
+  height: 55px;
+}
+
+/* ---- BOTONES ---- */
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-top: 50px;
+}
+
+.buttons button {
+  width: 180px;
+  height: 60px;
+  font-size: 22px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+
+.espera {
+  background: #767d85;
+}
+
+.cancelar {
+  background: #d10b0b;
+}
+
+.cobrar {
+  background: #4cd96f;
+}

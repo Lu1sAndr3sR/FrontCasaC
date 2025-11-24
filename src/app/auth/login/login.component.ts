@@ -1,12 +1,24 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MaterialModule } from '../../material.module';
 import { RouterModule, Router } from '@angular/router';
+
+// Importa Angular Material directamente
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MaterialModule, RouterModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterModule,
+
+    // 👇 Importa aquí los módulos que sí funcionan en standalone
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule
+  ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
@@ -24,10 +36,9 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       const { usuario, password } = this.loginForm.value;
 
-      // 🔐 Validación de ejemplo
       if (usuario === 'admin' && password === '123') {
         console.log('Login correcto');
-        this.router.navigate(['/dashboard']); // 👈 AQUÍ VAS AL DASHBOARD
+        this.router.navigate(['/dashboard']);
       } else {
         alert('Usuario o contraseña incorrectos');
       }
