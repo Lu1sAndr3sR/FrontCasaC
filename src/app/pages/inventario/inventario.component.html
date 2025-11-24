@@ -1,10 +1,8 @@
-<!-- referencia: /mnt/data/7efa8a46-6add-4618-bc16-00309716f0c3.png -->
 <div class="inventory-page">
 
-  <!-- TOP BAR dark -->
   <div class="top-bar">
     <div class="top-left">
-      <img src="assets/logoC.png" alt="logo" class="logo">
+      <img src="assets/logoC.png" alt="logo" class="logo" onerror="this.style.display='none'">
     </div>
 
     <div class="top-center">
@@ -14,15 +12,15 @@
         <span class="menu-item">Agregar Producto</span>
         <span class="menu-item active">Inventario</span>
         <span class="menu-item">Reportes</span>
-        <span class="menu-item">Notificaciones</span>
       </div>
 
       <div class="search-row">
         <div class="search-box">
           <i class="bi bi-search"></i>
-          <input type="text" placeholder="Buscar producto...">
-          <!-- iconos a la derecha (simples) -->
-          <div class="search-tools">T | 0</div>
+          <input type="text" 
+                 placeholder="Buscar por nombre o código..." 
+                 (input)="buscar($event)">
+          <div class="search-tools">Total: {{ filtered.length }}</div>
         </div>
       </div>
     </div>
@@ -33,10 +31,8 @@
     </div>
   </div>
 
-  <!-- Main dark background area -->
   <div class="main-area">
 
-    <!-- INVENTARIO HEADER + FILTERS -->
     <div class="inventory-header">
       <div class="inventory-title">
         <div class="ico-red"><span>⌁</span></div>
@@ -46,61 +42,74 @@
       <div class="filters">
         <button class="btn-filter" [class.active]="selectedFilter==='todos'" (click)="selectFilter('todos')">Todos</button>
         <button class="btn-filter" [class.active]="selectedFilter==='bajo'" (click)="selectFilter('bajo')">Bajo Stock</button>
-        <button class="btn-filter" [class.active]="selectedFilter==='categoria'" (click)="openCategorias()">Categoría (Tornillería, Herramientas, Pinturas)</button>
+        <button class="btn-filter" [class.active]="selectedFilter==='categoria'" (click)="openCategorias()">Categorías</button>
       </div>
     </div>
 
-    <!-- TABLE CARD -->
     <div class="table-card">
+      
       <div class="table-head">
         <div>Miniatura</div>
         <div>Nombre de Producto</div>
-        <div>SKU</div>
+        <div>Código Barras</div>
         <div>Precio</div>
         <div>Stock</div>
         <div>Acciones</div>
       </div>
 
       <div class="table-body">
-        <div class="table-row header-row">
-          <!-- header visually like mockup (left area) -->
-        </div>
+        
+        @for (p of filtered; track p.producto_id) {
+          <div class="row">
+            <div class="cell thumb">
+              <img src="assets/productos/default.png" alt="mini" onerror="this.src='https://via.placeholder.com/50'">
+            </div>
+            
+            <div class="cell name">
+              <div class="small">{{ p.descripcion }}</div>
+              <div class="big">{{ p.nombre }}</div>
+            </div>
+            
+            <div class="cell sku">{{ p.codigo_barras }}</div>
+            
+            <div class="cell price">${{ p.precio_menudeo }}</div>
+            
+            <div class="cell stock" [class.low]="p.stock_actual <= p.stock_minimo">
+              {{ p.stock_actual }}
+            </div>
+            
+            <div class="cell actions">
+              <button class="link" (click)="editar(p)">Editar</button>
+              <button class="icon-del" (click)="eliminar(p)">🗑️</button>
+            </div>
+          </div>
+        } @empty {
+          <div class="row" style="justify-content: center; padding: 20px; color: #666;">
+            No se encontraron productos coinciden con tu búsqueda.
+          </div>
+        }
 
-        <div class="row" *ngFor="let p of filtered">
-          <div class="cell thumb">
-            <img [src]="p.thumb || 'assets/productos/default.png'" alt="mini">
-          </div>
-          <div class="cell name">
-            <div class="small">Miniatura de la Imagento</div>
-            <div class="big">{{ p.nombre }}</div>
-          </div>
-          <div class="cell sku">{{ p.sku }}</div>
-          <div class="cell price">${{ p.precio.toFixed(2) }}</div>
-          <div class="cell stock" [class.low]="p.stock < 5">{{ p.stock }}</div>
-          <div class="cell actions">
-            <button class="link" (click)="editar(p)">Editar</button>
-            <button class="icon-del" (click)="eliminar(p)">🗑️</button>
-          </div>
-        </div>
       </div>
     </div>
 
-    <!-- Floating add button -->
     <button class="fab" title="Agregar Producto">+</button>
 
   </div>
 
-  <!-- CATEGORIES MODAL -->
-  <div class="modal-backdrop" *ngIf="modalCategorias">
-    <div class="modal">
-      <h3>Seleccionar Categoría</h3>
-      <ul>
-        <li *ngFor="let c of categorias" (click)="filterByCategory(c)">{{ c }}</li>
-      </ul>
-      <div class="modal-actions">
-        <button class="btn close" (click)="closeCategorias()">Cerrar</button>
+  @if (modalCategorias) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <h3>Seleccionar Categoría</h3>
+        <ul>
+          @for (c of categorias; track c) {
+            <li (click)="filterByCategory(c)">{{ c }}</li>
+          }
+        </ul>
+        <div class="modal-actions">
+          <button class="btn close" (click)="closeCategorias()">Cerrar</button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 
 </div>

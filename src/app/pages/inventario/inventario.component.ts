@@ -1,19 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
-export interface Producto {
-  id: number;
-  thumb?: string; // ruta a la miniatura en assets/productos/...
-  nombre: string;
-  sku: string;
-  stock: number;
-  precio: number;
-  categoria: string;
-}
+// NOTA: Ya no necesitamos CommonModule gracias a la sintaxis nueva (@for)
+import { ProductosService, Producto } from '../../services/productos.service'; 
 
 @Component({
   selector: 'app-inventario',
   standalone: true,
+  imports: [], 
   templateUrl: './inventario.component.html',
   styleUrls: ['./inventario.component.css']
 })
@@ -22,27 +15,57 @@ export class InventarioComponent implements OnInit {
   horaActual = '';
   selectedFilter: 'todos' | 'bajo' | 'categoria' = 'todos';
   modalCategorias = false;
-  categorias = ['Herramientas', 'Tornillería', 'Pintura', 'Electricidad', 'Plomería'];
+  
+  // Categorías de ejemplo (tu BD aún no tiene tabla de categorías)
+  categorias = ['General', 'Abarrotes', 'Limpieza', 'Farmacia']; 
 
-  // datos de ejemplo (reemplaza por tu API)
-  inventario: Producto[] = [
-    { id: 1, thumb: 'assets/productos/tornillo.png', nombre: 'Tornillos Cabeza Plana', sku: 'TRN-CPL-M8', stock: 550, precio: 8.50, categoria: 'Tornillería' },
-    { id: 2, thumb: 'assets/productos/martillo.png', nombre: 'Martillo de Uña', sku: 'HRR-MTO-001', stock: 12, precio: 15.99, categoria: 'Herramientas' },
-    { id: 3, thumb: 'assets/productos/pintura.png', nombre: 'Pintura Acrílica Blanca', sku: 'PNT-ACR-001', stock: 8, precio: 25.75, categoria: 'Pintura' },
-    { id: 4, thumb: 'assets/productos/llave.png', nombre: 'Llave Inglesa Ajustable', sku: 'LLV-ING-01', stock: 3, precio: 180.00, categoria: 'Herramientas' },
-    { id: 5, thumb: 'assets/productos/cinta.png', nombre: 'Cinta Métrica 5m', sku: 'CINTA-MET-05', stock: 20, precio: 4.90, categoria: 'Herramientas' }
-  ];
+  // Listas de datos
+  inventario: Producto[] = []; // La lista completa original
+  filtered: Producto[] = [];   // La lista que se muestra (filtrada)
 
-  filtered: Producto[] = [];
-
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productosService: ProductosService
+  ) {}
 
   ngOnInit(): void {
-    this.filtered = [...this.inventario];
     this.updateDateTime();
     setInterval(() => this.updateDateTime(), 1000);
+    
+    // Cargar datos al iniciar
+    this.cargarProductos();
   }
 
+  cargarProductos() {
+    this.productosService.getProductos().subscribe({
+      next: (data) => {
+        console.log('Productos cargados:', data);
+        this.inventario = data;
+        this.filtered = [...this.inventario]; // Inicialmente mostramos todo
+      },
+      error: (err) => console.error('Error al cargar productos', err)
+    });
+  }
+
+  // --- BUSCADOR EN TIEMPO REAL ---
+  buscar(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const texto = input.value.toLowerCase().trim();
+
+    if (texto === '') {
+      // Si borran el texto, regresamos al filtro actual (por defecto 'todos')
+      this.selectFilter(this.selectedFilter);
+      return;
+    }
+
+    // Filtramos por nombre O por código de barras
+    this.filtered = this.inventario.filter(p => 
+      p.nombre.toLowerCase().includes(texto) || 
+      p.codigo_barras.includes(texto)
+    );
+  }
+
+  // --- RELOJ ---
   updateDateTime() {
     const now = new Date();
     const d = now.getDate().toString().padStart(2, '0');
@@ -53,27 +76,27 @@ export class InventarioComponent implements OnInit {
     let h = now.getHours();
     const min = now.getMinutes().toString().padStart(2, '0');
     const ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12;
-    h = h ? h : 12;
+    h = h % 12; h = h ? h : 12;
     this.horaActual = `${h}:${min} ${ampm}`;
   }
 
+  // --- NAVEGACIÓN ---
   goTo(path: string) {
-    // rutas: '/caja', '/dashboard'
     this.router.navigate([path]);
   }
 
-  // filtros
+  // --- FILTROS ---
   selectFilter(type: 'todos' | 'bajo' | 'categoria') {
     this.selectedFilter = type;
+    
     if (type === 'todos') {
       this.filtered = [...this.inventario];
       this.modalCategorias = false;
     } else if (type === 'bajo') {
-      this.filtered = this.inventario.filter(p => p.stock < 5 || p.stock <= 12); // ajuste visual similar al mockup
+      // Filtra productos con stock menor o igual al mínimo
+      this.filtered = this.inventario.filter(p => p.stock_actual <= p.stock_minimo);
       this.modalCategorias = false;
     } else {
-      // abre modal de categorías
       this.modalCategorias = true;
     }
   }
@@ -88,19 +111,28 @@ export class InventarioComponent implements OnInit {
   }
 
   filterByCategory(cat: string) {
-    this.filtered = this.inventario.filter(p => p.categoria === cat);
-    this.selectedFilter = 'categoria';
+    console.log('Filtro por categoría pendiente (BD sin columna categoria)');
     this.modalCategorias = false;
   }
 
-  // acciones de la tabla (placeholder)
+  // --- ACCIONES ---
   editar(p: Producto) {
-    console.log('editar', p);
-    // abrir modal editar o ruta
+    console.log('Editar producto:', p);
+    // Aquí podrías navegar a una pantalla de edición: this.router.navigate(['/editar', p.producto_id]);
   }
 
   eliminar(p: Producto) {
-    this.inventario = this.inventario.filter(x => x.id !== p.id);
-    this.selectFilter(this.selectedFilter); // refresca vista
+    if(confirm(`¿Estás seguro de eliminar "${p.nombre}"?`)) {
+      this.productosService.deleteProducto(p.producto_id).subscribe({
+        next: () => {
+          // Eliminamos el producto de la lista local para no recargar la página
+          this.inventario = this.inventario.filter(x => x.producto_id !== p.producto_id);
+          // Reaplicamos el filtro actual para actualizar la vista
+          this.buscar({ target: { value: '' } } as any); // Truco para resetear o podrías llamar a selectFilter
+          this.selectFilter(this.selectedFilter);
+        },
+        error: (e) => alert('Error al eliminar: ' + e.message)
+      });
+    }
   }
 }
