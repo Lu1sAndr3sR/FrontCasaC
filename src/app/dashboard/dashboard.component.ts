@@ -19,4 +19,7 @@ export class DashboardComponent {
   goInventario() {
     this.router.navigate(['/inventario']);
   }
+   goNotificaciones() {
+    this.router.navigate(['/notificaciones']);
+  }
 }

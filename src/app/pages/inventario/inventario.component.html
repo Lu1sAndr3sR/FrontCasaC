@@ -1,5 +1,6 @@
 <div class="inventory-page">
 
+  <!-- TOP BAR -->
   <div class="top-bar">
     <div class="top-left">
       <img src="assets/logoC.png" alt="logo" class="logo" onerror="this.style.display='none'">
@@ -9,7 +10,6 @@
       <div class="menu-inline">
         <span class="menu-item" (click)="goTo('/dashboard')">Home</span>
         <span class="menu-item" (click)="goTo('/caja')">Nueva Venta</span>
-        <span class="menu-item">Agregar Producto</span>
         <span class="menu-item active">Inventario</span>
         <span class="menu-item">Reportes</span>
       </div>
@@ -31,6 +31,7 @@
     </div>
   </div>
 
+  <!-- MAIN AREA -->
   <div class="main-area">
 
     <div class="inventory-header">
@@ -46,8 +47,8 @@
       </div>
     </div>
 
+    <!-- TABLE -->
     <div class="table-card">
-      
       <div class="table-head">
         <div>Miniatura</div>
         <div>Nombre de Producto</div>
@@ -58,7 +59,6 @@
       </div>
 
       <div class="table-body">
-        
         @for (p of filtered; track p.producto_id) {
           <div class="row">
             <div class="cell thumb">
@@ -88,28 +88,55 @@
             No se encontraron productos coinciden con tu búsqueda.
           </div>
         }
-
       </div>
     </div>
 
-    <button class="fab" title="Agregar Producto">+</button>
+    <!-- BOTÓN FLOTANTE PARA AGREGAR PRODUCTO -->
+    <button class="fab" title="Agregar Producto" (click)="abrirModalAgregar()">+</button>
 
+  </div> <!-- FIN MAIN AREA -->
+
+  <!-- MODAL CATEGORÍAS -->
+  <div class="modal-backdrop" *ngIf="modalCategorias">
+    <div class="modal">
+      <h3>Seleccionar Categoría</h3>
+      <ul>
+        <li *ngFor="let c of categorias" (click)="filterByCategory(c)">{{ c }}</li>
+      </ul>
+      <div class="modal-actions">
+        <button class="btn close" (click)="closeCategorias()">Cerrar</button>
+      </div>
+    </div>
   </div>
 
-  @if (modalCategorias) {
-    <div class="modal-backdrop">
-      <div class="modal">
-        <h3>Seleccionar Categoría</h3>
-        <ul>
-          @for (c of categorias; track c) {
-            <li (click)="filterByCategory(c)">{{ c }}</li>
-          }
-        </ul>
-        <div class="modal-actions">
-          <button class="btn close" (click)="closeCategorias()">Cerrar</button>
-        </div>
+  <!-- MODAL AGREGAR PRODUCTO -->
+  <div class="modal-backdrop" *ngIf="modalAgregar">
+    <div class="modal modal-agregar">
+      <h3>Agregar Producto</h3>
+
+      <label>Nombre del producto</label>
+      <input type="text" [(ngModel)]="nuevo.nombre">
+
+      <label>Código de barras</label>
+      <input type="text" [(ngModel)]="nuevo.barras">
+
+      <label>Código abreviado (opcional)</label>
+      <input type="text" [(ngModel)]="nuevo.abreviado">
+
+      <label>Precio de compra</label>
+      <input type="number" [(ngModel)]="nuevo.precioCompra">
+
+      <label>Precio de venta</label>
+      <input type="number" [(ngModel)]="nuevo.precioVenta">
+
+      <label>Precio de descuento</label>
+      <input type="number" [(ngModel)]="nuevo.precioDescuento">
+
+      <div class="modal-actions">
+        <button class="btn cancel" (click)="cerrarModalAgregar()">Cancelar</button>
+        <button class="btn save" (click)="guardarProducto()">Guardar</button>
       </div>
     </div>
-  }
+  </div>
 
-</div>
+</div> <!-- FIN INVENTORY-PAGE -->

@@ -4,14 +4,14 @@
   <div class="top-bar">
 
   <!-- Caja -->
-  <div class="bar-item" (click)="goCaja()">
+  <div class="bar-item">
     <img src="assets/Caja.png" class="bar-icon" alt="caja">
     <p class="bar-label">Caja</p>
   </div>
 
   <!-- Nueva venta -->
   <div class="bar-item">
-    <img src="assets/Venta.png" class="bar-icon" alt="venta">
+    <img src="assets/Venta.png" class="bar-icon" alt="venta" (click)="goCaja()">
     <p class="bar-label">Nueva Venta</p>
   </div>
 
@@ -35,7 +35,7 @@
 
   <!-- Notificaciones -->
   <div class="bar-item">
-    <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti">
+     <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti" (click)="goNotificaciones()">
     <p class="bar-label">Notificaciones</p>
   </div>
 
