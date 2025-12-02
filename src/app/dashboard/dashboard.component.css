@@ -10,21 +10,36 @@
   background: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: space-between; /* 🔥 Distribuye todo el espacio de forma uniforme */
+  justify-content: space-around; /* separa los items de forma uniforme */
   padding: 20px 50px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+}
+
+/* Contenedor de cada icono + texto */
+.bar-item {
+  display: flex;
+  flex-direction: column; /* imagen arriba, texto abajo */
+  align-items: center;
+  cursor: pointer;
 }
 
 /* Iconos de la barra superior */
 .bar-icon {
   width: 80px;
   height: auto;
-  cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .bar-icon:hover {
   transform: scale(1.2);
+}
+
+/* Etiqueta debajo del icono */
+.bar-label {
+  margin-top: 6px;
+  font-size: 14px;
+  text-align: center;
+  color: #0A2647; /* color de texto, ajustable */
 }
 
 /* Icono especial */

@@ -3,31 +3,50 @@
   <!-- --- BARRA SUPERIOR (icons) --- -->
   <div class="top-bar">
 
-    <!-- Caja (YA FUNCIONA EL CLICK) -->
-    <img src="assets/Caja.png" 
-         class="bar-icon" 
-         alt="caja" 
-         (click)="goCaja()">
-
-    <!-- Nueva venta -->
-    <img src="assets/Venta.png" class="bar-icon" alt="venta">
-
-    <!-- Agregar producto -->
-    <img src="assets/Agregar.png" class="bar-icon" alt="agregar">
-
-    <!-- Inventario -->
-    <img src="assets/Inventario.png" class="bar-icon" alt="inventario" (click)="goInventario()">
-
-    <!-- Reportes -->
-    <img src="assets/Reportes.png" class="bar-icon" alt="reportes">
-
-    <!-- Notificaciones -->
-    <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti">
-
-    <!-- Usuario -->
-    <img src="assets/UserI.png" class="bar-icon" alt="useri">
-
+  <!-- Caja -->
+  <div class="bar-item" (click)="goCaja()">
+    <img src="assets/Caja.png" class="bar-icon" alt="caja">
+    <p class="bar-label">Caja</p>
   </div>
+
+  <!-- Nueva venta -->
+  <div class="bar-item">
+    <img src="assets/Venta.png" class="bar-icon" alt="venta">
+    <p class="bar-label">Nueva Venta</p>
+  </div>
+
+  <!-- Agregar producto -->
+  <div class="bar-item">
+    <img src="assets/Agregar.png" class="bar-icon" alt="agregar">
+    <p class="bar-label">Agregar Producto</p>
+  </div>
+
+  <!-- Inventario -->
+  <div class="bar-item" (click)="goInventario()">
+    <img src="assets/Inventario.png" class="bar-icon" alt="inventario">
+    <p class="bar-label">Inventario</p>
+  </div>
+
+  <!-- Reportes -->
+  <div class="bar-item">
+    <img src="assets/Reportes.png" class="bar-icon" alt="reportes">
+    <p class="bar-label">Reportes</p>
+  </div>
+
+  <!-- Notificaciones -->
+  <div class="bar-item">
+    <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti">
+    <p class="bar-label">Notificaciones</p>
+  </div>
+
+  <!-- Usuario -->
+  <div class="bar-item">
+    <img src="assets/UserI.png" class="bar-icon" alt="useri">
+    <p class="bar-label">Usuario</p>
+  </div>
+
+</div>
+
 
   <!-- --- SECCIÓN INFERIOR (logo + ajustes) --- -->
   <div class="bottom-area"> 

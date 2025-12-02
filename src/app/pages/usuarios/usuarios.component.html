@@ -1,0 +1,96 @@
+<!-- Barra superior -->
+<div class="topbar">
+  <img src="assets/logoC.png" class="logo" (click)="goDashboard()">
+</div>
+
+<div class="usuarios-wrapper">
+
+  <!-- Botón volver -->
+  <img src="assets/volver.png" class="back-btn-img" (click)="goDashboard()">
+
+  <!-- Encabezado -->
+  <div class="header-line">
+    <h2 class="titulo">Gestión de Usuarios</h2>
+
+    <!-- Buscador -->
+    <div class="buscador-container">
+      <input 
+        type="text" 
+        placeholder="Buscar..." 
+        (input)="buscarUsuario($any($event.target).value)">
+      <button class="btn-lupa">
+        <img src="assets/buscar.png">
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de Usuarios -->
+  <div class="lista-usuarios">
+
+    <div class="usuario-item" *ngFor="let u of usuarios">
+      <div class="icono-usuario">
+        <svg width="40" height="40" fill="#0A2647">
+          <circle cx="20" cy="12" r="8"></circle>
+          <rect x="6" y="22" width="28" height="14" rx="7"></rect>
+        </svg>
+      </div>
+
+      <div class="datos-usuario">
+        <p class="nombre">{{ u.nombre }}</p>
+        <p class="rol">{{ u.rol }}</p>
+      </div>
+
+      <div class="acciones">
+        <button class="btn-edit" (click)="abrirEditar(u)">
+          <img src="assets/Editar.png" width="28">
+        </button>
+
+        <button class="btn-delete" (click)="abrirEliminar(u)">
+          <img src="assets/Eliminar.png" width="28">
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Botón agregar usuario -->
+  <img src="assets/AddUser.png" class="btn-agregar-img" (click)="abrirAgregar()">
+
+</div>
+
+
+<!-- MODAL EDITAR -->
+<div class="modal-backdrop" *ngIf="modalEditar">
+  <div class="modal-box">
+
+    <h3>Editar Usuario</h3>
+
+    <label>Nombre:</label>
+    <input [(ngModel)]="usuarioEditando.nombre">
+
+    <label>Rol:</label>
+    <input [(ngModel)]="usuarioEditando.rol">
+
+    <div class="modal-botones">
+      <button (click)="guardarEdicion()">Guardar</button>
+      <button (click)="cerrarModal()">Cancelar</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- MODAL ELIMINAR -->
+<div class="modal-backdrop" *ngIf="modalEliminar">
+  <div class="modal-box">
+
+    <h3>¿Eliminar usuario?</h3>
+    <p>{{ usuarioEliminando?.nombre }}</p>
+
+    <div class="modal-botones">
+      <button class="btn-delete" (click)="confirmarEliminar()">Eliminar</button>
+      <button (click)="cerrarModal()">Cancelar</button>
+    </div>
+
+  </div>
+</div>

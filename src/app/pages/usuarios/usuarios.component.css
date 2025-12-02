@@ -1,0 +1,206 @@
+/* Barra superior */
+.topbar {
+  width: 100%;
+  height: 125px;
+  background-color: #0A2647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  height: 250px;
+  cursor: pointer;
+}
+
+/* Contenedor principal */
+.usuarios-wrapper {
+  width: 100%;
+  max-width: 850px; /* un poco más pequeño */
+  margin: 20px auto;
+  padding: 0 20px;
+  position: relative;
+}
+
+/* Botón volver */
+.back-btn-img {
+  width: 55px;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Título centrado */
+.header-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 50px;
+}
+
+.titulo {
+  font-size: 32px;
+  font-weight: bold;
+  color: #000;
+  margin: 0;
+  text-align: center;
+}
+
+/* Buscador */
+.buscador-container {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: transparent;
+}
+
+.buscador-container input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
+/* Botón lupa */
+.btn-lupa {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-lupa img {
+  width: 35px;
+  height: 35px;
+  display: block;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* LISTA DE USUARIOS */
+.lista-usuarios {
+  margin-top: 50px;
+  max-width: 750px; /* lista más compacta */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.usuario-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px; /* un poco menos de padding */
+  margin-bottom: 18px;
+
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  position: relative;
+}
+
+.icono-usuario {
+  display: flex;
+  align-items: center;
+  margin-right: -300px; /* menos separación con los datos */
+}
+
+/* Datos */
+.datos-usuario .nombre {
+  font-size: 22px; /* un poco más grande */
+  font-weight: bold;
+  margin: 0;
+}
+
+.datos-usuario .rol {
+  font-size: 14px; /* un poco más pequeño */
+  margin: 0;
+  color: #555; /* más sutil */
+}
+
+/* Botones de acciones */
+.acciones {
+  display: flex;
+  gap: 10px; /* un poco más cerca */
+}
+
+.acciones button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.acciones img {
+  width: 40px;
+  height: 40px;
+  display: block;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Botón agregar flotante */
+.btn-agregar-img {
+  width: 90px;
+  position: fixed;
+  right: 30px;
+  bottom: 25px;
+  cursor: pointer;
+}
+
+/* MODALES */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: white;
+  padding: 25px;
+  width: 330px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-box input {
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: white;
+}
+
+.modal-botones {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.modal-botones button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-botones button:first-child {
+  background: #0A2647;
+  color: white;
+}
+
+.modal-botones button:last-child {
+  background: #ccc;
+}
