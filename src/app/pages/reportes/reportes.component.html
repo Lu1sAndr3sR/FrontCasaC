@@ -1,0 +1,98 @@
+<div class="window">
+
+  <!-- ===== Barra Superior ===== -->
+  <div class="topbar">
+    <img src="assets/logoC.png" class="logo" (click)="goDashboard()">
+
+    <div class="topbar-links">
+      <button (click)="goCaja()">Caja</button>
+      <button (click)="goUsuarios()">Usuarios</button>
+      <button (click)="goInventario()">Inventario</button>
+      <button (click)="goNotificaciones()">Notificaciones</button>
+    </div>
+  </div>
+
+  <!-- ===== Contenido ===== -->
+  <div class="reportes-container">
+
+    <div class="reportes-header">
+      <h2>Reporte:</h2>
+
+      <div class="acciones">
+
+  <!-- Selector de periodo -->
+  <select [(ngModel)]="periodoSeleccionado" (change)="generarGrafica()">
+    <option value="dia">Por día</option>
+    <option value="semana">Por semana</option>
+    <option value="mes">Por mes</option>
+    <option value="personalizado">Personalizado</option>
+  </select>
+
+  <!-- Botón Generar Gráfica de Barras (siempre visible) -->
+  <button class="btn-grafica" 
+        (click)="generarGraficaBarras()" 
+        title="Generar gráfica/reporte">
+  ✅
+</button>
+
+
+  <!-- Calendarios SOLO si es personalizado -->
+  <div class="fechas" *ngIf="periodoSeleccionado === 'personalizado'">
+
+    <!-- Desde -->
+    <div class="fecha-input">
+      <label>Desde:</label>
+      <div class="input-date-wrapper">
+        <input #desdeDate type="date" [(ngModel)]="fechaInicio" (change)="generarGrafica()">
+        <button type="button" (click)="desdeDate.showPicker()">📅</button>
+      </div>
+    </div>
+
+    <!-- Hasta -->
+    <div class="fecha-input">
+      <label>Hasta:</label>
+      <div class="input-date-wrapper">
+        <input #hastaDate type="date" [(ngModel)]="fechaFin" (change)="generarGrafica()">
+        <button type="button" (click)="hastaDate.showPicker()">📅</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Botón Exportar -->
+  <button class="exportar" (click)="exportarDatos()" title="Exportar">
+  <img src="assets/exportar.png" alt="Exportar" class="icono-exportar">
+</button>
+
+
+</div>
+
+
+
+    </div>
+
+    <!-- ====== Cards ====== -->
+    <div class="cards-grid">
+      <div class="card">
+        <h3>Entradas</h3>
+        <p class="cantidad">{{ entradasTotales }}</p>
+      </div>
+
+      <div class="card">
+        <h3>Salidas</h3>
+        <p class="cantidad">{{ salidasTotales }}</p>
+      </div>
+
+      <div class="card">
+        <h3>Ventas</h3>
+        <p class="cantidad">{{ ventasTotales }}</p>
+      </div>
+    </div>
+
+    <!-- ====== Gráfica ====== -->
+    <div class="grafica-wrapper">
+      <canvas id="graficaReportes"></canvas>
+    </div>
+
+  </div>
+</div>

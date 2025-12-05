@@ -5,25 +5,39 @@ import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { NotificacionesComponent } from './pages/notificaciones/notificaciones.component';
 
 export const routes: Routes = [
+  // Ruta por defecto
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
+  // Auth
   { path: 'login', component: LoginComponent },
 
+  // Dashboard
   { path: 'dashboard', component: DashboardComponent },
 
-  { path: 'usuarios', component: UsuariosComponent},
+  // Usuarios
+  { path: 'usuarios', component: UsuariosComponent },
 
-  {path:'notificaciones', component: NotificacionesComponent },
+  // Notificaciones
+  { path: 'notificaciones', component: NotificacionesComponent },
 
-  {
-    path: 'caja',
+  // Reportes (standalone)
+  { 
+    path: 'reportes', 
+    loadComponent: () =>
+      import('./pages/reportes/reportes.component').then(m => m.ReportesComponent)
+  },
+
+  // Caja (standalone)
+  { 
+    path: 'caja', 
     loadComponent: () =>
       import('./pages/caja/caja.component').then(m => m.CajaComponent)
   },
-  { 
-  path: 'inventario', 
-  loadComponent: () => import('./pages/inventario/inventario.component')
-    .then(m => m.InventarioComponent) 
-}
 
+  // Inventario (standalone)
+  { 
+    path: 'inventario', 
+    loadComponent: () =>
+      import('./pages/inventario/inventario.component').then(m => m.InventarioComponent)
+  }
 ];
