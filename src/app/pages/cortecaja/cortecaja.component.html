@@ -1,0 +1,88 @@
+<div class="page-root">
+
+  <!-- TOP DARK BAR (logo + date area) -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="logo-wrap">
+        <img src="assets/logoC.png" alt="Casa Cortés" class="logo-img" />
+      </div>
+      <div class="top-right">
+        <div class="cajero">CAJERO:</div>
+        <div class="fecha">Fecha: DD/MM/AAAA &nbsp; <span class="hora">00:00</span></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN DARK BACKGROUND -->
+  <main class="main-bg">
+
+    <!-- CENTERED PANEL (dark area where the white cards live) -->
+    <section class="panel">
+      <div class="panel-inner">
+
+        <!-- CARDS ROW (white small cards) -->
+        <div class="cards-row">
+          <div class="card small-card">
+            <div class="card-title">Monto Inicial</div>
+            <div class="card-body">
+              <div class="input-with-symbol">
+                <span class="sym">$</span>
+                <input type="number" [(ngModel)]="montoInicial" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card small-card">
+            <div class="card-title">Entrada de Dinero</div>
+            <div class="card-body">
+              <div class="input-with-symbol">
+                <span class="sym">$</span>
+                <input type="number" [(ngModel)]="entradaDinero" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card small-card">
+            <div class="card-title">Salida de Efectivo</div>
+            <div class="card-body">
+              <div class="input-with-symbol">
+                <span class="sym">$</span>
+                <input type="number" [(ngModel)]="salidaEfectivo" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card small-card">
+            <div class="card-title">Monto Esperado<br><span class="sub">(Total calculado)</span></div>
+            <div class="card-body">
+              <div class="monto-display">$ {{ montoEsperado | number:'1.2-2' }}</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CIERRE DE CAJA (big white box) -->
+    <section class="cierre-section">
+      <h3 class="cierre-title">Cierre de Caja</h3>
+
+      <div class="cierre-card">
+        <div class="left">
+          <label class="label">Monto Final (Ingresar conteo)</label>
+          <div class="input-final">
+            <span class="sym">$</span>
+            <input type="number" [(ngModel)]="montoFinal" placeholder="0.00" />
+          </div>
+
+          <button class="btn-close" (click)="cerrarCaja()">Cerrar Caja</button>
+        </div>
+
+        <div class="right">
+          <!-- espacio vacío igual al mockup (puedes usar para notas o resumen) -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>

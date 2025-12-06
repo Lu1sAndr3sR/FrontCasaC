@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-caja',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './caja.component.html',
   styleUrls: ['./caja.component.css']
 })

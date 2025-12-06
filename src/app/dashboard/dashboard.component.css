@@ -77,3 +77,82 @@
 .settings-icon:hover {
   transform: rotate(25deg) scale(1.1);
 }
+.user-popup {
+  position: absolute;
+  top: 70px;         /* Ajusta según tu barra */
+  right: 20px;       /* Ajusta donde está tu icono */
+  background: white;
+  border-radius: 10px;
+  padding: 12px 18px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.25);
+  z-index: 999;
+  width: 160px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.user-popup p {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.user-popup p:hover {
+  background: #f0f0f0;
+  border-radius: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.user-popup {
+  position: absolute;
+  top: 70px;
+  right: 40px;
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 20px;
+  width: 220px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.25);
+  z-index: 9999;
+}
+
+.user-profile {
+  text-align: center;
+}
+
+.user-photo {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.username {
+  font-size: 18px;
+  margin: 5px 0;
+  font-weight: bold;
+}
+
+.info {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.logout-btn {
+  margin-top: 15px;
+  background: #d9534f;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.logout-btn:hover {
+  background: #c9302c;
+}

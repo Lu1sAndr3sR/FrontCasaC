@@ -3,58 +3,79 @@
   <!-- --- BARRA SUPERIOR (icons) --- -->
   <div class="top-bar">
 
-  <!-- Caja -->
-  <div class="bar-item">
-    <img src="assets/Caja.png" class="bar-icon" alt="caja">
-    <p class="bar-label">Caja</p>
+    <!-- Caja -->
+    <div class="bar-item">
+      <img src="assets/Caja.png" class="bar-icon" alt="caja" (click)="goCorteCaja()">
+      <p class="bar-label">Caja</p>
+    </div>
+
+    <!-- Nueva venta -->
+    <div class="bar-item">
+      <img src="assets/Venta.png" class="bar-icon" alt="venta" (click)="goCaja()">
+      <p class="bar-label">Nueva Venta</p>
+    </div>
+
+    <!-- Agregar producto -->
+    <div class="bar-item">
+      <img src="assets/Agregar.png" class="bar-icon" alt="agregar">
+      <p class="bar-label">Agregar Producto</p>
+    </div>
+
+    <!-- Inventario -->
+    <div class="bar-item" (click)="goInventario()">
+      <img src="assets/Inventario.png" class="bar-icon" alt="inventario">
+      <p class="bar-label">Inventario</p>
+    </div>
+
+    <!-- Reportes -->
+    <div class="bar-item">
+      <img src="assets/Reportes.png" class="bar-icon" alt="reportes" (click)="goReporte()">
+      <p class="bar-label">Reportes</p>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="bar-item">
+      <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti" (click)="goNotificaciones()">
+      <p class="bar-label">Notificaciones</p>
+    </div>
+
+    <!-- Usuario -->
+    <div class="bar-item" (click)="toggleUserMenu()">
+      <img src="assets/UserI.png" class="bar-icon" alt="useri">
+      <p class="bar-label">Usuario</p>
+    </div>
+
+    <!-- Popup del usuario (perfil directo) -->
+    <div class="user-popup" *ngIf="showUserMenu">
+      <div class="user-profile">
+
+        <!-- Foto del usuario -->
+        <img src="assets/UserI.png" class="user-photo" alt="user">
+
+        <!-- Nombre -->
+        <h4 class="username">{{ usuarioNombre }}</h4>
+
+        <!-- Fecha -->
+        <p class="info">Fecha: {{ fechaActual }}</p>
+
+        <!-- Hora -->
+        <p class="info">Hora: {{ horaActual }}</p>
+
+        <!-- Botón cerrar sesión -->
+        <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
+
+      </div>
+    </div>
+
   </div>
-
-  <!-- Nueva venta -->
-  <div class="bar-item">
-    <img src="assets/Venta.png" class="bar-icon" alt="venta" (click)="goCaja()">
-    <p class="bar-label">Nueva Venta</p>
-  </div>
-
-  <!-- Agregar producto -->
-  <div class="bar-item">
-    <img src="assets/Agregar.png" class="bar-icon" alt="agregar">
-    <p class="bar-label">Agregar Producto</p>
-  </div>
-
-  <!-- Inventario -->
-  <div class="bar-item" (click)="goInventario()">
-    <img src="assets/Inventario.png" class="bar-icon" alt="inventario">
-    <p class="bar-label">Inventario</p>
-  </div>
-
-  <!-- Reportes -->
-  <div class="bar-item">
-    <img src="assets/Reportes.png" class="bar-icon" alt="reportes">
-    <p class="bar-label">Reportes</p>
-  </div>
-
-  <!-- Notificaciones -->
-  <div class="bar-item">
-     <img src="assets/Noti.png" class="bar-icon noti-icon" alt="noti" (click)="goNotificaciones()">
-    <p class="bar-label">Notificaciones</p>
-  </div>
-
-  <!-- Usuario -->
-  <div class="bar-item">
-    <img src="assets/UserI.png" class="bar-icon" alt="useri">
-    <p class="bar-label">Usuario</p>
-  </div>
-
-</div>
-
 
   <!-- --- SECCIÓN INFERIOR (logo + ajustes) --- -->
-  <div class="bottom-area"> 
+  <div class="bottom-area">
     <div class="logo-container">
       <img src="assets/logoC.png" alt="Logo">
     </div>
 
-    <div class="settings-icon">⚙️</div>
+    <div class="settings-icon" (click)="goUsuarios()">⚙️</div>
   </div>
 
 </div>

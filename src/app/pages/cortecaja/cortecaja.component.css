@@ -1,0 +1,185 @@
+/* Import font optionally (uncomment if you want Montserrat) */
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap'); */
+
+:root{
+  --dark-bg: #222528; /* panel background */
+  --topbar: #1f2325;  /* top dark bar */
+  --accent-red: #d32f2f;
+}
+
+/* page full */
+.page-root {
+  min-height: 100vh;
+  background: #f4f4f4;
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+/* top dark bar */
+.top-bar {
+  background: var(--topbar);
+  color: #fff;
+  padding: 14px 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+}
+.top-bar-inner {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.logo-img {
+  height:48px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+.top-right { text-align:right; font-size:13px; color:#d0d0d0; }
+.top-right .cajero { font-weight:700; color:#e6e6e6; }
+
+/* main dark background area */
+.main-bg {
+  background: linear-gradient(180deg, #2a2e30 0%, #232526 100%);
+  padding: 28px 40px;
+  min-height: calc(100vh - 88px);
+  color: #fff;
+}
+
+/* centered white panel inside the dark main (where small cards sit) */
+.panel {
+  max-width: 1200px;
+  margin: 0 auto 28px auto;
+}
+.panel-inner {
+  padding: 26px;
+  /* keep it dark like mockup but visually separated */
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* cards row */
+.cards-row {
+  display:flex;
+  gap: 20px;
+  width:100%;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+/* single small white card style */
+.card {
+  background: #fff;
+  color: #111;
+  border-radius: 8px;
+  padding: 18px;
+  width: 260px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.card-title {
+  font-size: 15px;
+  font-weight:700;
+  color:#222;
+  margin-bottom:10px;
+}
+.card .sub { font-size:11px; color:#666; font-weight:600; }
+
+/* input inside card */
+.input-with-symbol {
+  position: relative;
+}
+.input-with-symbol .sym {
+  position:absolute;
+  left:12px;
+  top:10px;
+  font-weight:700;
+  color:#666;
+}
+.input-with-symbol input {
+  width:100%;
+  padding:10px 12px 10px 30px;
+  font-size:18px;
+  border-radius:6px;
+  border:1px solid #e0e0e0;
+}
+
+/* monto display style */
+.monto-display {
+  font-size: 22px;
+  font-weight:800;
+  margin-top:6px;
+  color:#000;
+}
+
+/* CIERRE DE CAJA area */
+.cierre-section {
+  max-width: 1100px;
+  margin: 18px auto;
+  padding-top: 12px;
+}
+.cierre-title {
+  color: #fff;
+  font-size:20px;
+  font-weight:700;
+  margin-bottom: 8px;
+  text-decoration: underline #444 1px;
+  text-underline-offset: 8px;
+}
+
+/* big white card */
+.cierre-card {
+  display:flex;
+  gap: 24px;
+  background: #fff;
+  color: #111;
+  border-radius: 8px;
+  padding: 22px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  align-items:flex-start;
+}
+
+/* left column (input + button) */
+.cierre-card .left {
+  flex: 1 1 60%;
+}
+.cierre-card .right {
+  flex: 1 1 40%;
+  /* empty in mockup */
+}
+
+/* label and input big */
+.label { font-weight:700; margin-bottom:10px; display:block; color:#333; }
+.input-final { position:relative; width:420px; }
+.input-final .sym { position:absolute; left:12px; top:12px; font-weight:700; color:#666; }
+.input-final input {
+  width:100%;
+  padding:12px 14px 12px 36px;
+  font-size:20px;
+  border-radius:6px;
+  border:1px solid #e6e6e6;
+}
+
+/* close button */
+.btn-cerrar {
+  margin-top:18px;
+  background: var(--accent-red);
+  color:#fff;
+  border:none;
+  padding:12px 24px;
+  font-size:16px;
+  border-radius:6px;
+  cursor:pointer;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.btn-cerrar:hover { background:#b62828; }
+
+/* responsive */
+@media (max-width: 1100px) {
+  .cards-row { justify-content:center; gap:12px; }
+  .card { width:calc(50% - 20px); }
+  .input-final { width:100%; }
+}
+@media (max-width: 700px) {
+  .card { width:100%; }
+  .cierre-card { flex-direction:column; }
+  .cierre-card .right { order:2; width:100%; }
+  .cierre-card .left { width:100%; }
+}
