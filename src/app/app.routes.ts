@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { UsuariosComponent } from './pages/usuarios/usuarios.component';
 import { NotificacionesComponent } from './pages/notificaciones/notificaciones.component';
 
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
@@ -24,6 +25,11 @@ export const routes: Routes = [
   path: 'inventario', 
   loadComponent: () => import('./pages/inventario/inventario.component')
     .then(m => m.InventarioComponent) 
+},
+{
+  path: 'cortecaja',
+  loadComponent: () => import('./pages/cortecaja/cortecaja.component')
+    .then(m => m.CortecajaComponent)
 }
 
 ];
