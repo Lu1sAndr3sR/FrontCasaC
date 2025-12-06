@@ -6,18 +6,31 @@ import { NotificacionesComponent } from './pages/notificaciones/notificaciones.c
 
 
 export const routes: Routes = [
+  // Ruta por defecto
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
+  // Auth
   { path: 'login', component: LoginComponent },
 
+  // Dashboard
   { path: 'dashboard', component: DashboardComponent },
 
-  { path: 'usuarios', component: UsuariosComponent},
+  // Usuarios
+  { path: 'usuarios', component: UsuariosComponent },
 
-  {path:'notificaciones', component: NotificacionesComponent },
+  // Notificaciones
+  { path: 'notificaciones', component: NotificacionesComponent },
 
-  {
-    path: 'caja',
+  // Reportes (standalone)
+  { 
+    path: 'reportes', 
+    loadComponent: () =>
+      import('./pages/reportes/reportes.component').then(m => m.ReportesComponent)
+  },
+
+  // Caja (standalone)
+  { 
+    path: 'caja', 
     loadComponent: () =>
       import('./pages/caja/caja.component').then(m => m.CajaComponent)
   },
@@ -30,6 +43,12 @@ export const routes: Routes = [
   path: 'cortecaja',
   loadComponent: () => import('./pages/cortecaja/cortecaja.component')
     .then(m => m.CortecajaComponent)
-}
-
+},
+  // Inventario (standalone)
+  { 
+    path: 'inventario', 
+    loadComponent: () =>
+      import('./pages/inventario/inventario.component').then(m => m.InventarioComponent)
+  }
+   
 ];
