@@ -1,1 +1,21 @@
 <router-outlet></router-outlet>
+
+<div class="toast-notification" 
+     [class.show]="mostrarAlerta" 
+     (click)="irANotificaciones()">
+     
+  <div class="toast-content">
+    <div class="toast-icon">🔔</div>
+    
+    <div class="toast-text">
+      <h4>Aviso de Sistema</h4>
+      <p>{{ mensajeAlerta }}</p>
+      <span style="font-size: 10px; color: #888; margin-top: 5px; display: block;">
+        Clic para ver detalles →
+      </span>
+    </div>
+
+    <button class="toast-close" (click)="cerrarAlerta($event)">×</button>
+  </div>
+  
+</div>

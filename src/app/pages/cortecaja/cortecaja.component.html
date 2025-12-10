@@ -1,33 +1,30 @@
 <div class="page-root">
 
-  <!-- TOP DARK BAR (logo + date area) -->
   <header class="top-bar">
     <div class="top-bar-inner">
       <div class="logo-wrap">
-        <img src="assets/logoC.png" alt="Casa Cortés" class="logo-img" />
+        <img src="assets/logoC.png" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
       </div>
       <div class="top-right">
-        <div class="cajero">CAJERO:</div>
+        <div class="cajero">CAJERO: <span style="color: #4cd96f; font-weight: bold;">{{ nombreCajero }}</span></div>
         <div class="fecha">Fecha: DD/MM/AAAA &nbsp; <span class="hora">00:00</span></div>
       </div>
     </div>
   </header>
 
-  <!-- MAIN DARK BACKGROUND -->
   <main class="main-bg">
 
-    <!-- CENTERED PANEL (dark area where the white cards live) -->
     <section class="panel">
       <div class="panel-inner">
 
-        <!-- CARDS ROW (white small cards) -->
         <div class="cards-row">
+          
           <div class="card small-card">
             <div class="card-title">Monto Inicial</div>
             <div class="card-body">
               <div class="input-with-symbol">
                 <span class="sym">$</span>
-                <input type="number" [(ngModel)]="montoInicial" />
+                <input type="text" [value]="montoInicial | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
               </div>
             </div>
           </div>
@@ -37,19 +34,20 @@
             <div class="card-body">
               <div class="input-with-symbol">
                 <span class="sym">$</span>
-                <input type="number" [(ngModel)]="entradaDinero" />
+                <input type="text" [value]="entradaDinero | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
               </div>
             </div>
           </div>
 
           <div class="card small-card">
-            <div class="card-title">Salida de Efectivo</div>
+            <div class="card-title">Salida de Efectivo (Registrada)</div>
             <div class="card-body">
               <div class="input-with-symbol">
                 <span class="sym">$</span>
-                <input type="number" [(ngModel)]="salidaEfectivo" />
+                <input type="text" [value]="salidaEfectivo | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
               </div>
             </div>
+            <button class="btn-egreso" (click)="abrirModalEgreso()"> Registrar Salida</button>
           </div>
 
           <div class="card small-card">
@@ -63,7 +61,6 @@
       </div>
     </section>
 
-    <!-- CIERRE DE CAJA (big white box) -->
     <section class="cierre-section">
       <h3 class="cierre-title">Cierre de Caja</h3>
 
@@ -75,14 +72,38 @@
             <input type="number" [(ngModel)]="montoFinal" placeholder="0.00" />
           </div>
 
-          <button class="btn-close" (click)="cerrarCaja()">Cerrar Caja</button>
+          <div [style.color]="diferencia < 0 ? 'var(--accent-red)' : (diferencia > 0 ? 'green' : '#333')"
+                 style="font-weight: bold; margin-top: 10px;">
+                DIFERENCIA: ${{ diferencia | number:'1.2-2' }} 
+                <span *ngIf="diferencia < 0">⚠️ Faltante</span>
+                <span *ngIf="diferencia > 0">✅ Sobrante</span>
+          </div>
+
+          <button class="btn-cerrar" (click)="cerrarCaja()">Cerrar Caja</button>
         </div>
 
         <div class="right">
-          <!-- espacio vacío igual al mockup (puedes usar para notas o resumen) -->
-        </div>
+          </div>
       </div>
     </section>
 
   </main>
+</div>
+
+
+<div class="modal-overlay" *ngIf="showEgresoModal">
+    <div class="modal-content">
+        <h3>Registrar Salida de Efectivo</h3>
+        
+        <div class="form-group">
+            <label>Monto a Retirar ($)</label>
+            <input type="number" [(ngModel)]="montoEgreso" placeholder="0.00" autofocus>
+        </div>
+        
+        
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="showEgresoModal=false">Cancelar</button>
+            <button class="btn-primary" (click)="registrarEgreso()">Registrar y Aplicar</button>
+        </div>
+    </div>
 </div>

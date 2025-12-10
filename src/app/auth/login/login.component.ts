@@ -11,7 +11,6 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-//componente login
 export class LoginComponent {
   loginForm: FormGroup;
 
@@ -30,16 +29,38 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       const { usuario, password } = this.loginForm.value;
 
-      // 🔍 LOG para ver qué se envía al backend
-      console.log("📤 Enviando al backend:");
-      console.log("Usuario:", usuario);
-      console.log("Contraseña:", password);
+      console.log("📤 Enviando al backend:", usuario);
 
       this.authService.login(usuario, password).subscribe({
-        next: (resp) => {
+        next: (resp: any) => {
           console.log('Login correcto:', resp);
+          
+          // 1. Guardar Token
           localStorage.setItem('token', resp.token);
-          this.router.navigate(['/dashboard']);
+          
+          // ⚠️ 2. GUARDAR ID DE USUARIO (ESTA ERA LA LÍNEA FALTANTE) ⚠️
+          // Intentamos buscar el ID en varias partes por si la estructura cambia
+          const idReal = resp.usuario_id || resp.usuario?.usuario_id || resp.id;
+          
+          if (idReal) {
+             localStorage.setItem('idUsuario', idReal.toString());
+             console.log("✅ ID de Usuario guardado:", idReal);
+          } else {
+             console.error("⚠️ No se encontró ID en la respuesta del login", resp);
+          }
+          
+          // 3. Guardar Nombre
+          const nombreCajero = resp.nombre || resp.usuario?.nombre || usuario;
+          localStorage.setItem('nombreCajero', nombreCajero);
+
+          // 4. Guardar Rol
+          const esAdmin = (resp.rol_id === 1) ? 'true' : 'false';
+          localStorage.setItem('esAdmin', esAdmin);
+
+          // 5. Guardar Login Único
+          localStorage.setItem('usuarioActual', resp.usuario?.usuario || usuario);
+
+          this.router.navigate(['/dashboard']); 
         },
         error: (err) => {
           console.error(err);

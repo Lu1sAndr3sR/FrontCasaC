@@ -2,46 +2,98 @@
 
 <div class="caja-container">
 
-  <!-- BARRA SUPERIOR -->
-  <div class="top-bar">
-    <img src="assets/logoC.png" class="logo" alt="logo">
+    <div class="top-bar">
+        <img src="assets/logoC.png" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
 
-    <div class="top-info">
-      <span>CAJERO:</span>
-      <span>FECHA: {{ fechaActual }}</span>
-      <span>HORA: {{ horaActual }}</span>
-    </div>
-  </div>
-
-  <!-- BUSCADOR -->
-  <div class="search-bar">
-    <input type="text" placeholder="BUSCAR PRODUCTO">
-    <span class="search-icon">🔍</span>
-  </div>
-
-  <!-- TABLA -->
-  <div class="table-container">
-
-    <div class="table-header">
-      <div>CÓDIGO</div>
-      <div>PRODUCTO</div>
-      <div>CANTIDAD</div>
-      <div>PRECIO</div>
-      <div>SUBTOTAL</div>
-      <div></div>
+        <div class="top-info">
+            <span>CAJERO: <strong style="color: #4cd96f;">{{ nombreCajero }}</strong></span>
+            <span>FECHA: {{ fechaActual }}</span>
+            <span>HORA: {{ horaActual }}</span>
+        </div>
     </div>
 
-    <div class="table-row" *ngFor="let item of filas">
-      <div></div><div></div><div></div><div></div><div></div><div></div>
+    <div class="search-bar">
+        <input type="text" 
+               placeholder="ESCANEAR CÓDIGO O ESCRIBIR NOMBRE..." 
+               [(ngModel)]="busqueda"
+               (keyup.enter)="buscarProducto()"
+               autofocus>
+        <span class="search-icon" (click)="buscarProducto()">🔍</span>
     </div>
 
-  </div>
+    <div class="table-container">
 
-  <!-- BOTONES -->
-  <div class="buttons">
-    <button class="espera">EN ESPERA</button>
-    <button class="cancelar" (click)="cancelar()">CANCELAR</button>
-    <button class="cobrar" (click)="cobrar()">COBRAR</button>
-  </div>
+        <div class="table-header">
+            <div>CÓDIGO</div>
+            <div>PRODUCTO</div>
+            <div>CANTIDAD</div>
+            <div>PRECIO</div>
+            <div>SUBTOTAL</div>
+            <div></div>
+        </div>
+
+        <div class="table-content-scroll">
+
+            <div class="table-row" *ngFor="let item of carrito; let i = index">
+                <div>{{ item.codigo }}</div>
+
+                <div style="justify-content: flex-start; padding-left: 10px;">{{ item.nombre }}</div>
+
+                <div>
+                    <input type="number" 
+                           [(ngModel)]="item.cantidad" 
+                           (change)="actualizarCantidad(i)" 
+                           class="input-cantidad"
+                           min="1">
+                </div>
+
+                <div>${{ item.precio_venta | number:'1.2-2' }}</div>
+
+                <div style="font-weight: bold;">${{ item.subtotal | number:'1.2-2' }}</div>
+
+                <div (click)="eliminarDelCarrito(i)" style="cursor: pointer; color: #d10b0b; font-weight: bold; font-size: 18px;">
+                    X
+                </div>
+            </div>
+
+            <div *ngIf="carrito.length === 0" style="padding: 30px; text-align: center; color: #aaa; font-size: 18px;">
+                LISTO PARA ESCANEAR...
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer-area">
+        <div class="total-display">
+            TOTAL: ${{ totalVenta | number:'1.2-2' }}
+        </div>
+
+        <div class="venta-tipo-control">
+            <div class="tipo-selector">
+                <span>TIPO DE VENTA:</span>
+                <button 
+                    (click)="tipoVentaSeleccionado = 'Tienda'; numeroPedidoInput = ''" 
+                    [class.active]="tipoVentaSeleccionado === 'Tienda'">
+                    EN TIENDA
+                </button>
+                <button 
+                    (click)="tipoVentaSeleccionado = 'Pedido'" 
+                    [class.active]="tipoVentaSeleccionado === 'Pedido'">
+                    POR PEDIDO
+                </button>
+            </div>
+
+            <div class="pedido-input" *ngIf="tipoVentaSeleccionado === 'Pedido'">
+                <input type="text" 
+                       placeholder="NÚMERO DE PEDIDO" 
+                       [(ngModel)]="numeroPedidoInput">
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="cancelar" (click)="cancelar()">CANCELAR</button>
+            <button class="cobrar" (click)="cobrar()">COBRAR</button>
+        </div>
+    </div>
 
 </div>

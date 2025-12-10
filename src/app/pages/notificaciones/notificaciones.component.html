@@ -1,16 +1,44 @@
-<div class="notificaciones-wrapper">
-
-  <div class="header">
-    <button class="back-btn" (click)="goBack()">←</button>
-    <h2 class="title">Notificaciones</h2>
-  </div>
-
-  <div class="content">
-    <div class="notification-placeholder">
-      <img src="assets/icons/bell.png" alt="Notificaciones" class="placeholder-icon">
-      <p>No hay notificaciones por el momento.</p>
-      <span>El backend las conectará pronto.</span>
+<div class="page-root">
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="logo-wrap">
+        <img src="assets/logoC.png" class="logo" alt="logo" (click)="goBack()" style="cursor: pointer;">
+      </div>
+      <div class="top-right">
+        <h2 class="page-title">CENTRO DE NOTIFICACIONES</h2>
+      </div>
     </div>
-  </div>
+  </header>
 
+  <main class="main-bg">
+    <div class="panel">
+      
+      <div *ngIf="cargando" class="loading">Cargando alertas...</div>
+
+      <div class="noti-list" *ngIf="!cargando && notificaciones.length > 0">
+        
+        <div class="noti-card clickable" 
+             *ngFor="let noti of notificaciones"
+             (click)="irAlInventario(noti)">
+             
+          <div class="icon-area">⚠️</div>
+          <div class="text-area">
+            <h3>{{ noti.titulo }}</h3>
+            <p>{{ noti.mensaje }}</p>
+            <span class="stock-badge">{{ noti.detalle }}</span>
+          </div>
+          <div class="time-area">Ir a editar →</div>
+        </div>
+
+      </div>
+
+      <div class="empty-state" *ngIf="!cargando && notificaciones.length === 0">
+        <div class="icon-empty">🔔</div>
+        <h3>Todo en orden</h3>
+        <p>No tienes notificaciones pendientes.</p>
+        <button class="btn-back" (click)="goBack()">Volver al Dashboard</button>
+      </div>
+
+    </div>
+  </main>
 </div>

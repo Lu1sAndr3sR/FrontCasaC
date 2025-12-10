@@ -1,110 +1,205 @@
-* {
-  font-family: 'Oswald', sans-serif;
-}
+* { font-family: 'Oswald', sans-serif; }
 
 .caja-container {
-  width: 100%;
-  height: 100vh;
-  background: #ffffff;
+    width: 100%;
+    height: 100vh;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column; 
 }
 
 /* ---- BARRA SUPERIOR ---- */
 .top-bar {
-  background: #1e2227;
-  height: 110px;
-  display: flex;
-  align-items: center;
-  padding: 0 30px;
-  justify-content: space-between;
+    background: #1e2227;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    justify-content: space-between;
+    flex-shrink: 0; 
 }
 
-.logo {
-  height: 90px;
-}
-
-.top-info {
-  color: white;
-  font-size: 20px;
-  display: flex;
-  gap: 60px;
-}
+.logo { height: 90px; cursor: pointer; }
+.top-info { color: white; font-size: 20px; display: flex; gap: 60px; }
 
 /* ---- BUSCADOR ---- */
 .search-bar {
-  margin: 30px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+    margin: 20px 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .search-bar input {
-  width: 250px;
-  height: 45px;
-  background: #efefef;
-  border: none;
-  padding-left: 15px;
-  font-size: 16px;
-  letter-spacing: 2px;
+    width: 350px;
+    height: 45px;
+    background: #efefef;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding-left: 15px;
+    font-size: 18px;
+    letter-spacing: 1px;
 }
-
-.search-icon {
-  font-size: 28px;
-  cursor: pointer;
-}
+.search-icon { font-size: 28px; cursor: pointer; }
 
 /* ---- TABLA ---- */
 .table-container {
-  margin: 20px;
+    margin: 0 30px;
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
 }
 
-.table-header,
+.table-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 0.4fr;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-right: 15px; 
+}
+
+.table-content-scroll {
+    overflow-y: auto;
+    max-height: calc(100vh - 350px); 
+    padding-right: 5px;
+}
+
 .table-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr 1fr 1fr 0.4fr;
-  gap: 10px;
-  margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr 0.4fr;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .table-header div {
-  background: #e5e5e5;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+    background: #e5e5e5;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 500;
 }
 
 .table-row div {
-  background: #ededed;
-  height: 55px;
+    background: #ededed;
+    min-height: 55px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
-/* ---- BOTONES ---- */
+/* INPUT CANTIDAD DENTRO DE TABLA */
+.input-cantidad {
+    width: 70px;
+    height: 35px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+/* ---- FOOTER (TOTAL Y BOTONES) ---- */
+.footer-area {
+    background: #f4f4f4;
+    border-top: 5px solid #1e2227;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.total-display {
+    font-size: 40px;
+    font-weight: bold;
+    color: #1e2227;
+    background: white;
+    padding: 5px 20px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+}
+
+/* ESTILOS PARA EL CONTROL DE TIPO DE VENTA */
+.venta-tipo-control {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.tipo-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.tipo-selector span {
+    color: #1e2227;
+}
+
+.tipo-selector button {
+    background: #ccc;
+    color: #1e2227;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.tipo-selector button.active {
+    background: #1e2227;
+    color: white;
+}
+
+.tipo-selector button:hover {
+    background: #b0b0b0;
+}
+
+.tipo-selector button.active:hover {
+    background: #1e2227;
+}
+
+.pedido-input input {
+    width: 200px;
+    height: 35px;
+    padding-left: 10px;
+    border: 1px solid #1e2227;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
 .buttons {
-  display: flex;
-  justify-content: center;
-  gap: 60px;
-  margin-top: 50px;
+    display: flex;
+    gap: 20px;
 }
 
 .buttons button {
-  width: 180px;
-  height: 60px;
-  font-size: 22px;
-  color: white;
-  border: none;
-  cursor: pointer;
-  letter-spacing: 2px;
+    width: 160px;
+    height: 60px;
+    font-size: 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    border-radius: 6px;
 }
 
-.espera {
-  background: #767d85;
-}
+.espera { background: #767d85; }
+.cancelar { background: #d10b0b; }
+.cobrar { background: #4cd96f; font-weight: bold; font-size: 22px; }
 
-.cancelar {
-  background: #d10b0b;
-}
-
-.cobrar {
-  background: #4cd96f;
-}
+.cobrar:hover { background: #3cb35a; }
+.cancelar:hover { background: #a80909; }

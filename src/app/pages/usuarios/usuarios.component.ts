@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UsuariosService } from '../../services/usuarios.service';
 
 @Component({
   selector: 'app-usuarios',
@@ -10,90 +11,152 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.css']
 })
-export class UsuariosComponent {
+export class UsuariosComponent implements OnInit {
 
-  // Lista original de usuarios
-  usuariosOriginal = [
-    { nombre: 'USUARIO 1', rol: 'EMPLEADO' },
-    { nombre: 'USUARIO 2', rol: 'ADMINISTRADOR' },
-    { nombre: 'USUARIO 3', rol: 'EMPLEADO' }
-  ];
+  usuariosOriginal: any[] = [];
+  usuarios: any[] = []; 
+  
+  // Variables de Seguridad
+  soyAdmin = false;
+  usuarioActual = ''; // Aquí guardaremos mi propio login
 
-  // Lista mostrada
-  usuarios = [...this.usuariosOriginal];
-
-  // Campos para modales
+  // Modales
+  modalAgregar = false;
   modalEditar = false;
   modalEliminar = false;
-  usuarioEditando: any = null;
-  usuarioEliminando: any = null;
 
-  constructor(private router: Router) {}
+  usuarioEditando: any = {};
+  usuarioEliminando: any = {};
+  
+  // Objeto para crear nuevo
+  nuevoUsuario = {
+    nombre: '',
+    usuario: '',
+    contrasena: '', 
+    rol: 'EMPLEADO'
+  };
+
+  constructor(
+    private router: Router,
+    private usuariosService: UsuariosService
+  ) {}
+
+  ngOnInit() {
+    this.verificarPermisos();
+    this.cargarUsuarios();
+  }
 
   goDashboard() {
     this.router.navigate(['/dashboard']);
   }
 
-  // -------------------------
-  // ⭐ BUSCAR USUARIO
-  // -------------------------
+  // --- 1. SEGURIDAD ---
+  verificarPermisos() {
+    const esAdmin = localStorage.getItem('esAdmin');
+    this.soyAdmin = (esAdmin === 'true');
+
+    // Leemos quién está logueado
+    this.usuarioActual = localStorage.getItem('usuarioActual') || '';
+  }
+
+  // --- 2. CARGAR ---
+  cargarUsuarios() {
+    this.usuariosService.getUsuarios().subscribe({
+      next: (data) => {
+        // Traducir rol_id 1 -> ADMINISTRADOR
+        this.usuariosOriginal = data.map(u => ({
+            ...u,
+            rol: u.rol_id === 1 ? 'ADMINISTRADOR' : 'EMPLEADO'
+        }));
+        this.usuarios = [...this.usuariosOriginal];
+      },
+      error: (e) => console.error(e)
+    });
+  }
+
   buscarUsuario(texto: string) {
     texto = texto.toLowerCase();
-
+    if(!texto) {
+        this.usuarios = [...this.usuariosOriginal];
+        return;
+    }
     this.usuarios = this.usuariosOriginal.filter(u =>
       u.nombre.toLowerCase().includes(texto) ||
-      u.rol.toLowerCase().includes(texto)
+      u.usuario.toLowerCase().includes(texto)
     );
   }
 
-  // -------------------------
-  // ⭐ EDITAR
-  // -------------------------
-  abrirEditar(usuario: any) {
-    this.usuarioEditando = { ...usuario };
+  // --- 3. CREAR ---
+  abrirAgregar() {
+    if (!this.soyAdmin) { alert('Acceso denegado'); return; }
+    
+    this.nuevoUsuario = { nombre: '', usuario: '', contrasena: '', rol: 'EMPLEADO' };
+    this.modalAgregar = true;
+  }
+
+  guardarNuevo() {
+    if(!this.nuevoUsuario.nombre || !this.nuevoUsuario.usuario || !this.nuevoUsuario.contrasena) {
+        alert("Todos los campos son obligatorios");
+        return;
+    }
+
+    this.usuariosService.createUsuario(this.nuevoUsuario).subscribe({
+        next: () => {
+            alert("Usuario creado correctamente");
+            this.modalAgregar = false;
+            this.cargarUsuarios();
+        },
+        error: (e) => alert("Error al crear. El usuario ya existe.")
+    });
+  }
+
+  // --- 4. EDITAR ---
+  abrirEditar(u: any) {
+    if (!this.soyAdmin) { alert('Acceso denegado'); return; }
+
+    // Limpiamos contraseña para no mostrar el hash
+    this.usuarioEditando = { ...u, contrasena: '' }; 
     this.modalEditar = true;
   }
 
   guardarEdicion() {
-    const index = this.usuariosOriginal.findIndex(u => u.nombre === this.usuarioEditando.nombre);
-
-    if (index !== -1) {
-      this.usuariosOriginal[index] = { ...this.usuarioEditando };
-    }
-
-    this.usuarios = [...this.usuariosOriginal];
-    this.cerrarModal();
+    this.usuariosService.updateUsuario(this.usuarioEditando.usuario_id, this.usuarioEditando).subscribe({
+        next: () => {
+            alert("Usuario actualizado");
+            this.modalEditar = false;
+            this.cargarUsuarios();
+        },
+        error: () => alert("Error al actualizar")
+    });
   }
 
-  // -------------------------
-  // ⭐ ELIMINAR
-  // -------------------------
-  abrirEliminar(usuario: any) {
-    this.usuarioEliminando = usuario;
+  // --- 5. ELIMINAR ---
+  abrirEliminar(u: any) {
+    if (!this.soyAdmin) { alert('Acceso denegado'); return; }
+
+    // PROTECCIÓN CONTRA AUTO-ELIMINACIÓN
+    if (u.usuario === this.usuarioActual) {
+        alert("⚠️ No puedes eliminar tu propia cuenta mientras estás conectado.");
+        return;
+    }
+
+    this.usuarioEliminando = u;
     this.modalEliminar = true;
   }
 
   confirmarEliminar() {
-    this.usuariosOriginal = this.usuariosOriginal.filter(u => u !== this.usuarioEliminando);
-    this.usuarios = [...this.usuariosOriginal];
-    this.cerrarModal();
+    this.usuariosService.deleteUsuario(this.usuarioEliminando.usuario_id).subscribe({
+        next: () => {
+            this.modalEliminar = false;
+            this.cargarUsuarios();
+        },
+        error: () => alert("Error al eliminar")
+    });
   }
 
-  // -------------------------
-  // Cerrar cualquier modal
-  // -------------------------
   cerrarModal() {
+    this.modalAgregar = false;
     this.modalEditar = false;
     this.modalEliminar = false;
-    this.usuarioEditando = null;
-    this.usuarioEliminando = null;
   }
-
-  // -------------------------
-  // AGREGAR USUARIO
-  // -------------------------
-  abrirAgregar() {
-    alert("Aquí agregarás un usuario 😎 (este modal lo hacemos después)");
-  }
-
 }

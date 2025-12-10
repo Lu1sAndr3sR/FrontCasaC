@@ -74,3 +74,25 @@
   </div>
 
 </div>
+<div class="modal-overlay" *ngIf="!cajaAbierta">
+  <div class="modal-caja">
+    <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
+    <h2 style="color: #333; margin-bottom: 10px;">Apertura de Turno</h2>
+    <p style="color: #666; margin-bottom: 20px;">
+      Hola <strong>{{ usuarioNombre }}</strong>, para comenzar a vender ingresa el fondo de caja.
+    </p>
+
+    <div class="input-dinero-wrapper">
+      <span style="font-size: 24px; font-weight: bold; color: #555;">$</span>
+      <input type="number" 
+             [(ngModel)]="montoApertura" 
+             placeholder="0.00" 
+             (keyup.enter)="confirmarApertura()"
+             autofocus>
+    </div>
+
+    <button class="btn-abrir-turno" (click)="confirmarApertura()">
+      INICIAR SISTEMA
+    </button>
+  </div>
+</div>

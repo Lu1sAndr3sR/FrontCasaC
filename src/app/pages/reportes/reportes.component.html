@@ -1,9 +1,7 @@
 <div class="window">
 
-  <!-- ===== Barra Superior ===== -->
   <div class="topbar">
     <img src="assets/logoC.png" class="logo" (click)="goDashboard()">
-
     <div class="topbar-links">
       <button (click)="goCaja()">Caja</button>
       <button (click)="goUsuarios()">Usuarios</button>
@@ -12,87 +10,187 @@
     </div>
   </div>
 
-  <!-- ===== Contenido ===== -->
   <div class="reportes-container">
 
     <div class="reportes-header">
-      <h2>Reporte:</h2>
+      <h2>Reportes y Estadísticas</h2>
 
-      <div class="acciones">
-
-  <!-- Selector de periodo -->
-  <select [(ngModel)]="periodoSeleccionado" (change)="generarGrafica()">
-    <option value="dia">Por día</option>
-    <option value="semana">Por semana</option>
-    <option value="mes">Por mes</option>
-    <option value="personalizado">Personalizado</option>
-  </select>
-
-  <!-- Botón Generar Gráfica de Barras (siempre visible) -->
-  <button class="btn-grafica" 
-        (click)="generarGraficaBarras()" 
-        title="Generar gráfica/reporte">
-  ✅
-</button>
-
-
-  <!-- Calendarios SOLO si es personalizado -->
-  <div class="fechas" *ngIf="periodoSeleccionado === 'personalizado'">
-
-    <!-- Desde -->
-    <div class="fecha-input">
-      <label>Desde:</label>
-      <div class="input-date-wrapper">
-        <input #desdeDate type="date" [(ngModel)]="fechaInicio" (change)="generarGrafica()">
-        <button type="button" (click)="desdeDate.showPicker()">📅</button>
+      <div class="filtros-fecha">
+        <label>Del:</label>
+        <input type="date" [(ngModel)]="fechaInicio" (change)="cargarDatos()">
+        <label>Al:</label>
+        <input type="date" [(ngModel)]="fechaFin" (change)="cargarDatos()">
       </div>
     </div>
 
-    <!-- Hasta -->
-    <div class="fecha-input">
-      <label>Hasta:</label>
-      <div class="input-date-wrapper">
-        <input #hastaDate type="date" [(ngModel)]="fechaFin" (change)="generarGrafica()">
-        <button type="button" (click)="hastaDate.showPicker()">📅</button>
-      </div>
+    <div class="tabs-container">
+      <button class="tab-btn" [class.active]="tabActiva === 'ventas'" (click)="cambiarTab('ventas')">💰 Ventas</button>
+      <button class="tab-btn" [class.active]="tabActiva === 'productos'" (click)="cambiarTab('productos')">📦 Ranking</button>
+      <button class="tab-btn" [class.active]="tabActiva === 'caja'" (click)="cambiarTab('caja')">👮 Auditoría</button>
+
+      <button class="tab-btn" [class.active]="tabActiva === 'graficas'" (click)="cambiarTab('graficas')">📊 Gráficas</button>
     </div>
 
-  </div>
+    <div class="tab-content">
 
-  <!-- Botón Exportar -->
-  <button class="exportar" (click)="exportarDatos()" title="Exportar">
-  <img src="assets/exportar.png" alt="Exportar" class="icono-exportar">
-</button>
+      <div *ngIf="tabActiva === 'ventas'">
+        <div class="cards-grid">
+          <div class="card">
+            <h3>Total Ingresos</h3>
+            <p class="cantidad" style="color: #4cc9f0;">${{ resumenVentas.totalDinero | number:'1.2-2' }}</p>
+          </div>
+          <div class="card">
+            <h3>Ventas Totales</h3>
+            <p class="cantidad">{{ resumenVentas.conteoVentas }}</p>
+          </div>
+        </div>
 
-
-</div>
-
-
-
-    </div>
-
-    <!-- ====== Cards ====== -->
-    <div class="cards-grid">
-      <div class="card">
-        <h3>Entradas</h3>
-        <p class="cantidad">{{ entradasTotales }}</p>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Hora</th>
+              <th>Cajero</th>
+              <th>Tipo</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of listaVentas">
+              <td>#{{ v.folio }}</td>
+              <td>{{ v.fecha | date:'shortTime' }}</td>
+              <td>{{ v.nombre_cajero }}</td>
+              <td>{{ v.tipo_venta }}</td>
+              <td class="money">${{ v.total | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="card">
-        <h3>Salidas</h3>
-        <p class="cantidad">{{ salidasTotales }}</p>
+      <div *ngIf="tabActiva === 'productos'">
+        <h3 class="subtitulo">Productos Más Vendidos</h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Stock Actual</th>
+              <th>Cant. Vendida</th>
+              <th>$$ Generado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of listaProductos">
+              <td>{{ p.codigo_barras }}</td>
+              <td>{{ p.nombre_producto }}</td>
+              <td>{{ p.stock_actual }}</td>
+              <td style="color: #4cc9f0; font-weight: bold;">{{ p.cantidad_vendida }}</td>
+              <td class="money">${{ p.dinero_generado | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class="card">
-        <h3>Ventas</h3>
-        <p class="cantidad">{{ ventasTotales }}</p>
+      <div *ngIf="tabActiva === 'caja'">
+        <h3 class="subtitulo">Cortes de Caja</h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Abrió</th>
+              <th>Cerró</th>
+              <th>Inicial</th>
+              <th>Final</th>
+              <th>Diferencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of listaCortes">
+              <td>{{ c.fecha_apertura | date:'dd/MM HH:mm' }}</td>
+              <td>{{ c.abrio }}</td>
+              <td>{{ c.cerro || '---' }}</td>
+              <td>${{ c.monto_inicial }}</td>
+              <td>${{ c.monto_final || 0 }}</td>
+              <td [style.color]="c.diferencia_calculada < 0 ? '#ff5f5f' : '#4cd96f'">
+                {{ c.diferencia_calculada | currency }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="subtitulo" style="margin-top: 30px;">Movimientos y Retiros</h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Usuario</th>
+              <th>Tipo</th>
+              <th>Monto</th>
+              <th>Concepto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of listaMovimientosCaja">
+              <td>{{ m.fecha | date:'shortTime' }}</td>
+              <td>{{ m.usuario }}</td>
+              <td>{{ m.tipo_movimiento }}</td>
+              <td class="money">${{ m.monto }}</td>
+              <td>{{ m.concepto }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
 
-    <!-- ====== Gráfica ====== -->
-    <div class="grafica-wrapper">
-      <canvas id="graficaReportes"></canvas>
-    </div>
+      <div *ngIf="tabActiva === 'movimientos'">
+        <h3 class="subtitulo">Entradas y Salidas de Mercancía</h3>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Movimiento</th>
+              <th>Cantidad</th>
+              <th>Usuario</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of listaBitacoraInv">
+              <td>{{ m.fecha | date:'dd/MM HH:mm' }}</td>
+              <td>{{ m.nombre_producto }}</td>
+              <td>
+                <span [style.color]="m.tipo_movimiento === 'ENTRADA' ? '#4cd96f' : '#ff5f5f'">
+                  {{ m.tipo_movimiento }}
+                </span>
+              </td>
+              <td style="font-size:16px;">{{ m.cantidad }}</td>
+              <td>{{ m.nombre_usuario }}</td>
+              <td style="color:#aaa; font-style:italic;">{{ m.observaciones }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
+      <div *ngIf="tabActiva === 'graficas'">
+        <div class="graficas-grid">
+          
+          <div class="grafica-card">
+            <h3>🏆 Top 5 Más Vendidos</h3>
+            <div class="canvas-container">
+              <canvas id="chartBarras"></canvas>
+            </div>
+          </div>
+
+          <div class="grafica-card">
+            <h3>📈 Tendencia de Ventas (Por Día)</h3>
+            <div class="canvas-container">
+              <canvas id="chartLinea"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
