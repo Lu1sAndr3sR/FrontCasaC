@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; 
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +9,7 @@ import { Observable } from 'rxjs';
 export class UsuariosService {
 
   // Asegúrate que esta URL coincida con tu backend (puerto 3000)
-  private apiUrl = 'http://localhost:3000/api/usuarios';
-
+  private apiUrl = `${environment.apiUrl}/usuarios`;
   constructor(private http: HttpClient) { }
 
   // OBTENER TODOS

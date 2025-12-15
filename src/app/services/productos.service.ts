@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs'; // 1. Importar Subject
+import { environment } from '../../environments/environment'; 
 
 export interface Producto {
   producto_id: number;
@@ -21,7 +22,7 @@ export interface Producto {
 })
 export class ProductosService {
 
-  private api = 'http://localhost:3000/api/productos';
+  private api = `${environment.apiUrl}/productos`;
 
   // 2. Canal de comunicación para alertas
   private alertaStockSource = new Subject<string>();
