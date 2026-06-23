@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npx ng build --configuration=production",
+  "outputDirectory": "dist/casa-c/browser",
   "rewrites": [
     { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]
