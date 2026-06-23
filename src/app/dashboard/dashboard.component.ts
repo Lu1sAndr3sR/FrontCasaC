@@ -44,6 +44,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   kpiCargando        = false;
 
   onboarding: OnboardingStatus | null = null;
+  onboardingExpandido = false;
   esSuperAdmin = false;
 
   private relojInterval: ReturnType<typeof setInterval> | undefined;

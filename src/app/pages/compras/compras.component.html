@@ -145,8 +145,8 @@
 
       <div class="modal-footer">
         <button class="btn-secondary" (click)="modalAbierto = false">Cancelar</button>
-        <button class="btn-primary" (click)="guardar()" [disabled]="nuevaCompra.items.length === 0">
-          Registrar entrada
+        <button class="btn-primary" (click)="guardar()" [disabled]="nuevaCompra.items.length === 0 || guardando">
+          {{ guardando ? 'Registrando…' : 'Registrar entrada' }}
         </button>
       </div>
     </div>

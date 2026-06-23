@@ -109,24 +109,28 @@
   </div>
 
   <!-- --- ONBOARDING (solo si no está completo) --- -->
-  <div *ngIf="onboarding" class="onboarding-card">
-    <div class="onboarding-header">
-      <span class="onboarding-titulo">Primeros pasos — {{ onboarding.progreso }}/{{ onboarding.total }}</span>
-      <button class="onboarding-cerrar" (click)="onboarding = null" title="Ocultar">✕</button>
+  <div *ngIf="onboarding" class="onboarding-card" [class.expandido]="onboardingExpandido">
+    <div class="onboarding-header" (click)="onboardingExpandido = !onboardingExpandido" style="cursor:pointer;">
+      <span class="onboarding-titulo">
+        {{ onboardingExpandido ? '▾' : '▸' }} Primeros pasos — {{ onboarding.progreso }}/{{ onboarding.total }}
+      </span>
+      <button class="onboarding-cerrar" (click)="$event.stopPropagation(); onboarding = null" title="Ocultar">✕</button>
     </div>
-    <div class="onboarding-barra">
-      <div class="onboarding-progreso" [style.width.%]="(onboarding.progreso / onboarding.total) * 100"></div>
-    </div>
-    <ul class="onboarding-lista">
-      <li *ngFor="let paso of onboarding.pasos" [class.completado]="paso.completado">
-        <span class="paso-icono">{{ paso.completado ? '✓' : '○' }}</span>
-        <span class="paso-label">{{ paso.label }}</span>
-        <button *ngIf="!paso.completado && paso.id === 2" class="paso-btn" (click)="goUsuarios()">Configurar</button>
-        <button *ngIf="!paso.completado && paso.id === 3" class="paso-btn" (click)="goInventario()">Ir a inventario</button>
-        <button *ngIf="!paso.completado && paso.id === 4" class="paso-btn" (click)="goUsuarios()">Agregar usuario</button>
-        <button *ngIf="!paso.completado && paso.id === 5" class="paso-btn" (click)="goCaja()">Hacer venta</button>
-      </li>
-    </ul>
+    <ng-container *ngIf="onboardingExpandido">
+      <div class="onboarding-barra">
+        <div class="onboarding-progreso" [style.width.%]="(onboarding.progreso / onboarding.total) * 100"></div>
+      </div>
+      <ul class="onboarding-lista">
+        <li *ngFor="let paso of onboarding.pasos" [class.completado]="paso.completado">
+          <span class="paso-icono">{{ paso.completado ? '✓' : '○' }}</span>
+          <span class="paso-label">{{ paso.label }}</span>
+          <button *ngIf="!paso.completado && paso.id === 2" class="paso-btn" (click)="goUsuarios()">Configurar</button>
+          <button *ngIf="!paso.completado && paso.id === 3" class="paso-btn" (click)="goInventario()">Ir a inventario</button>
+          <button *ngIf="!paso.completado && paso.id === 4" class="paso-btn" (click)="goUsuarios()">Agregar usuario</button>
+          <button *ngIf="!paso.completado && paso.id === 5" class="paso-btn" (click)="goCaja()">Hacer venta</button>
+        </li>
+      </ul>
+    </ng-container>
   </div>
 
   <!-- --- SECCIÓN INFERIOR (logo + ajustes) --- -->

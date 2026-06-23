@@ -111,15 +111,23 @@ export class ComprasComponent implements OnInit {
     this.modalAbierto = true;
   }
 
+  guardando = false;
+
   guardar() {
+    if (this.guardando) return;
     if (this.nuevaCompra.items.length === 0) { this.toast.show('Agrega al menos un producto', 'error'); return; }
+    this.guardando = true;
     this.svcCompras.crear(this.nuevaCompra).subscribe({
       next: () => {
         this.toast.show('Compra registrada y stock actualizado', 'ok');
         this.modalAbierto = false;
+        this.guardando = false;
         this.cargar();
       },
-      error: (err) => this.toast.show(err.error?.error || 'Error al registrar compra', 'error')
+      error: (err) => {
+        this.toast.show(err.error?.error || 'Error al registrar compra', 'error');
+        this.guardando = false;
+      }
     });
   }
 
