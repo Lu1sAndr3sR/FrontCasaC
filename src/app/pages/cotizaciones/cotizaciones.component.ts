@@ -47,7 +47,7 @@ export class CotizacionesComponent implements OnInit {
   cargandoHistorial = false;
   cotizacionDetalle: Cotizacion | null = null;
 
-  nombreNegocio = localStorage.getItem('casac-nombre') || 'CasaC';
+  nombreNegocio = localStorage.getItem('casac-nombre') || 'SC POS';
   nombreCajero = localStorage.getItem('nombreCajero') || '';
 
   readonly ESTADOS: Record<string, string> = {

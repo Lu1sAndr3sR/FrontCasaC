@@ -579,7 +579,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `CasaC_${tipo}_${this.fechaInicio}_${this.fechaFin}.xlsx`;
+        a.download = `SCPOS_${tipo}_${this.fechaInicio}_${this.fechaFin}.xlsx`;
         a.click();
         URL.revokeObjectURL(url);
       },
@@ -589,7 +589,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
 
   exportarPDF(tipo: 'ventas' | 'productos' | 'caja' | 'inventario') {
     const doc = new jsPDF({ orientation: 'landscape' });
-    const titulo = `CasaC — Reporte de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+    const titulo = `SC POS — Reporte de ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
     const subtitulo = `Período: ${this.fechaInicio} al ${this.fechaFin}`;
 
     doc.setFontSize(16);
@@ -625,7 +625,7 @@ export class ReportesComponent implements OnInit, OnDestroy {
       alternateRowStyles: { fillColor: [245, 245, 245] }
     });
 
-    doc.save(`CasaC_${tipo}_${this.fechaInicio}_${this.fechaFin}.pdf`);
+    doc.save(`SCPOS_${tipo}_${this.fechaInicio}_${this.fechaFin}.pdf`);
   }
 
   goDashboard() { this.router.navigate(['/dashboard']); }

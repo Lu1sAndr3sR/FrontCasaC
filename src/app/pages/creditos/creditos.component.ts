@@ -22,7 +22,7 @@ export class CreditosComponent implements OnInit {
   notasPago = '';
   guardandoPago = false;
 
-  nombreNegocio = localStorage.getItem('casac-nombre') || 'CasaC';
+  nombreNegocio = localStorage.getItem('casac-nombre') || 'SC POS';
   hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
   constructor(

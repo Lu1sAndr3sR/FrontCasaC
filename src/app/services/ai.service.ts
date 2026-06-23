@@ -35,7 +35,7 @@ export class AiService {
   analizarReportes(datos: {
     ventas: VentaReporte[]; resumen: ResumenVentas; topProductos?: TopProducto[]; tendencia?: TendenciaVenta[]; cortes?: CorteReporte[]; compras?: Compra[];
   }): Observable<string> {
-    const sys = 'Eres el analista de negocio de CasaC, sistema POS de ferretería. Responde siempre en español con bullet points claros. Sé práctico y conciso.';
+    const sys = 'Eres el analista de negocio de SC POS, sistema POS de ferretería. Responde siempre en español con bullet points claros. Sé práctico y conciso.';
     const prompt = `Analiza los datos del período y genera un informe inteligente:
 
 RESUMEN: ${JSON.stringify(datos.resumen)}
@@ -53,7 +53,7 @@ Proporciona:
   }
 
   detectarAnomalias(ventas: VentaReporte[], cortes: CorteReporte[]): Observable<string> {
-    const sys = 'Eres auditor financiero de CasaC, una ferretería. Identifica anomalías con criterio. Responde en español con bullet points.';
+    const sys = 'Eres auditor financiero de SC POS, una ferretería. Identifica anomalías con criterio. Responde en español con bullet points.';
     const prompt = `Revisa estos datos en busca de anomalías o irregularidades:
 
 VENTAS (${ventas.length}): ${JSON.stringify(ventas.slice(0, 30).map(v => ({ folio: v.folio, total: v.total, cajero: v.nombre_cajero })))}
@@ -83,7 +83,7 @@ Proporciona:
   }
 
   analizarStockBajo(productosAlerta: { nombre: string; stock_actual: number; stock_minimo: number }[], ventasProductos: ProductoReporte[]): Observable<string> {
-    const sys = 'Eres el sistema de alertas de inventario de CasaC, una ferretería. Analiza stock y prioriza reabastecimiento. Responde en español.';
+    const sys = 'Eres el sistema de alertas de inventario de SC POS, una ferretería. Analiza stock y prioriza reabastecimiento. Responde en español.';
     const prompt = `Analiza productos con stock bajo y ventas recientes (30 días):
 
 PRODUCTOS EN ALERTA (${productosAlerta.length}): ${JSON.stringify(productosAlerta.map(p => ({ nombre: p.nombre, stock_actual: p.stock_actual, stock_minimo: p.stock_minimo ?? 5 })))}
@@ -98,7 +98,7 @@ Para cada producto:
   }
 
   asistenteCaja(pregunta: string, productos: Producto[]): Observable<string> {
-    const sys = 'Eres el asistente de caja de CasaC, una ferretería. Tienes acceso al catálogo. Responde en español de forma breve y directa. Máximo 3 oraciones.';
+    const sys = 'Eres el asistente de caja de SC POS, una ferretería. Tienes acceso al catálogo. Responde en español de forma breve y directa. Máximo 3 oraciones.';
     const prompt = `CATÁLOGO (${productos.length} productos): ${JSON.stringify(productos.slice(0, 60).map(p => ({ nombre: p.nombre, precio: p.precio_menudeo, mayoreo: p.precio_mayoreo, minMay: p.minimo_mayoreo, stock: p.stock_actual, cat: p.categoria })))}
 
 PREGUNTA: ${pregunta}`;

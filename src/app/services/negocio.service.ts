@@ -8,13 +8,13 @@ export class NegocioService {
   private readonly KEY_IVA_PORCENTAJE = 'casac-iva-porcentaje';
 
   logoUrl: string       = '';
-  nombreNegocio: string = 'CasaC';
+  nombreNegocio: string = 'SC POS';
   ivaActivo: boolean    = false;
   ivaPorcentaje: number = 16;
 
   constructor() {
     this.logoUrl      = localStorage.getItem(this.KEY_LOGO)   || '';
-    this.nombreNegocio = localStorage.getItem(this.KEY_NOMBRE) || 'CasaC';
+    this.nombreNegocio = localStorage.getItem(this.KEY_NOMBRE) || 'SC POS';
     const ivaGuardado = localStorage.getItem(this.KEY_IVA_ACTIVO);
     this.ivaActivo    = ivaGuardado === null ? true : ivaGuardado === 'true';
     const p = Number(localStorage.getItem(this.KEY_IVA_PORCENTAJE));
@@ -31,7 +31,7 @@ export class NegocioService {
   }
 
   actualizarNombre(nombre: string): void {
-    const limpio = nombre.trim() || 'CasaC';
+    const limpio = nombre.trim() || 'SC POS';
     this.nombreNegocio = limpio;
     localStorage.setItem(this.KEY_NOMBRE, limpio);
   }
@@ -45,7 +45,7 @@ export class NegocioService {
 
   resetear(): void {
     this.logoUrl       = 'assets/logoC.png';
-    this.nombreNegocio = 'CasaC';
+    this.nombreNegocio = 'SC POS';
     this.ivaActivo     = true;
     this.ivaPorcentaje = 16;
     localStorage.removeItem(this.KEY_LOGO);

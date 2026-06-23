@@ -22,7 +22,7 @@ export class ProveedoresComponent implements OnInit {
   editando: Proveedor | null = null;
   form: Proveedor = { nombre: '', contacto: '', telefono: '', email: '', direccion: '' };
 
-  nombreNegocio = localStorage.getItem('casac-nombre') || 'CasaC';
+  nombreNegocio = localStorage.getItem('casac-nombre') || 'SC POS';
   hora = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 
   constructor(
