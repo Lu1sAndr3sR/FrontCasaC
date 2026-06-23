@@ -1,13 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ScannerSocketService implements OnDestroy {
   private socket: Socket;
 
   constructor() {
-    this.socket = io(window.location.origin, {
+    this.socket = io(environment.socketUrl, {
       autoConnect: false,
       reconnectionAttempts: 4,
       reconnectionDelay: 3000,
