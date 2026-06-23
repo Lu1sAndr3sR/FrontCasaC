@@ -20,8 +20,8 @@
 }
 
 .logo-box img {
-  max-width: 40%;
-  max-height: 160px;
+  max-width: 100%;
+  max-height: 360px;
   height: auto;
   object-fit: contain;
 }

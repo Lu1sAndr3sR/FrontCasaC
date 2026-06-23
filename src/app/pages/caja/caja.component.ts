@@ -199,52 +199,29 @@ export class CajaComponent implements OnInit, OnDestroy {
     const texto = this.busqueda.trim().toLowerCase();
     this.resultadosBusqueda = [];
 
-    // Coincidencia exacta por código de barras → agregar directo
-    const porCodigo = this.listaProductos.find(p => p.codigo_barras?.toLowerCase() === texto);
-    if (porCodigo) {
-      this.agregarAlCarrito(porCodigo);
-      this.busqueda = '';
-      return;
-    }
-
-    // Coincidencias por nombre
-    const porNombre = this.listaProductos.filter(p => p.nombre.toLowerCase().includes(texto));
-    if (porNombre.length === 1) {
-      this.agregarAlCarrito(porNombre[0]);
-      this.busqueda = '';
-      return;
-    }
-    if (porNombre.length > 1) {
-      this.resultadosBusqueda = porNombre.slice(0, 10);
-      return; // Mostrar dropdown, no limpiar busqueda
-    }
-
-    // Si parece código de barras, buscar en API
-    const esCodigoBarras = /^\d+$/.test(texto);
-    if (esCodigoBarras) {
-      this.productosService.buscarProducto(texto, this.sucursalActivaService.sucursalId ?? undefined).subscribe({
-        next: (resultados) => {
-          if (resultados.length > 0) {
-            this.agregarAlCarrito(resultados[0]);
-            if (!this.listaProductos.find(p => p.producto_id === resultados[0].producto_id)) {
-              this.listaProductos.push(resultados[0]);
-            }
-            this.busqueda = '';
-          } else {
-            this.toastService.show(`Código ${this.busqueda} no encontrado`, 'error');
-            this.busqueda = '';
-          }
-        },
-        error: (err) => {
-          const msg = err?.status === 0 ? 'Error de conexión. Verifica la red.' : `Código ${this.busqueda} no encontrado`;
-          this.toastService.show(msg, 'error');
+    // Siempre buscar en la API para tener stock actualizado
+    this.productosService.buscarProducto(texto, this.sucursalActivaService.sucursalId ?? undefined).subscribe({
+      next: (resultados) => {
+        if (resultados.length === 1) {
+          this.agregarAlCarrito(resultados[0]);
+          this.busqueda = '';
+        } else if (resultados.length > 1) {
+          this.resultadosBusqueda = resultados.slice(0, 10);
+        } else {
+          this.toastService.show(`Producto "${this.busqueda}" no encontrado`, 'error');
           this.busqueda = '';
         }
-      });
-    } else {
-      this.toastService.show('Producto no encontrado', 'error');
-      this.busqueda = '';
-    }
+      },
+      error: (err) => {
+        const msg = err?.status === 0 ? 'Error de conexión. Verifica la red.' : `Producto "${this.busqueda}" no encontrado`;
+        this.toastService.show(msg, 'error');
+        this.busqueda = '';
+        // Fallback al cache local si hay error de red
+        const porNombre = this.listaProductos.filter(p => p.nombre.toLowerCase().includes(texto));
+        if (porNombre.length === 1) { this.agregarAlCarrito(porNombre[0]); this.busqueda = ''; }
+        else if (porNombre.length > 1) { this.resultadosBusqueda = porNombre.slice(0, 10); }
+      }
+    });
   }
 
   seleccionarProducto(producto: Producto) {

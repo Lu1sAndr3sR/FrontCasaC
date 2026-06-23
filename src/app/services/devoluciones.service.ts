@@ -17,6 +17,7 @@ export interface DevolucionPayload {
   motivo: string;
   usuario_id: number;
   sucursal_id: number;
+  caja_id?: number;
   detalles: DetalleDevolucion[];
 }
 

@@ -53,17 +53,7 @@
             </small>
           </div>
 
-          <div class="card small-card" *ngIf="totalVentas > 0">
-            <div class="card-title">Ventas del Día</div>
-            <div class="card-body">
-              <div class="input-with-symbol">
-                <span class="sym">$</span>
-                <input type="text" [value]="totalVentas | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
-              </div>
-            </div>
-          </div>
-
-          <div class="card small-card" *ngIf="totalDevoluciones > 0" style="border-color: #f87171;">
+          <div class="card small-card" style="border-color: #f87171;">
             <div class="card-title" style="color:#dc2626;">Devoluciones</div>
             <div class="card-body">
               <div class="input-with-symbol">

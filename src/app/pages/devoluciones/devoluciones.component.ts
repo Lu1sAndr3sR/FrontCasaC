@@ -142,6 +142,8 @@ export class DevolucionesComponent implements OnInit, OnDestroy {
 
     const usuarioId = Number(localStorage.getItem('idUsuario') ?? '1');
     const sucursalId = this.sucursalActivaService.sucursalId;
+    const cajaKey = `cajaAbiertaId-${sucursalId}`;
+    const cajaId = Number(localStorage.getItem(cajaKey) ?? '0') || undefined;
 
     this.guardando = true;
     this.devolucionesService.crear({
@@ -150,6 +152,7 @@ export class DevolucionesComponent implements OnInit, OnDestroy {
       motivo:      this.motivo.trim(),
       usuario_id:  usuarioId,
       sucursal_id: sucursalId,
+      caja_id:     cajaId,
       detalles
     }).subscribe({
       next: () => {
