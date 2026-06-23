@@ -1,6 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { environment } from '../../environments/environment';
 
 export interface AlertaStock {
   nombre: string;
@@ -17,7 +18,7 @@ export class NotificacionesSocketService implements OnDestroy {
     if (this.socket?.connected) return;
 
     const token = localStorage.getItem('token') ?? '';
-    this.socket = io(window.location.origin, {
+    this.socket = io(environment.socketUrl, {
       autoConnect: false,
       auth: { token }
     });
