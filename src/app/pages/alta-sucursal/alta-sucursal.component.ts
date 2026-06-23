@@ -31,7 +31,7 @@ export class AltaSucursalComponent implements AfterViewInit, OnDestroy {
   colonias: CatSatColonia[] = [];
   buscandoCp = false;
   guardando  = false;
-  cpValido   = false;
+  cpValido   = false; // true solo si SAT lo reconoce (no bloquea el guardado)
 
   private cp$ = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -99,8 +99,9 @@ export class AltaSucursalComponent implements AfterViewInit, OnDestroy {
     if (!this.form.nombre.trim()) {
       this.toastService.show('El nombre de la sucursal es obligatorio', 'error'); return;
     }
-    if (!this.cpValido) {
-      this.toastService.show('Ingresa un CP válido del catálogo SAT', 'error'); return;
+    const cp = this.form.cp_sat.trim();
+    if (cp && !/^\d{5}$/.test(cp)) {
+      this.toastService.show('El código postal debe tener 5 dígitos', 'error'); return;
     }
 
     const lat = parseFloat(this.form.latitud);

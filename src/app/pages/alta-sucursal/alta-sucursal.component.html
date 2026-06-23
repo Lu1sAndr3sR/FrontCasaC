@@ -19,9 +19,9 @@
 
     <div class="field">
       <label>
-        Código Postal (SAT) *
-        @if (buscandoCp) { <span class="buscando">buscando…</span> }
-        @if (cpValido)   { <span class="cp-ok">✓ CP válido · {{ colonias.length }} colonias</span> }
+        Código Postal
+        @if (buscandoCp) { <span class="buscando">buscando colonias…</span> }
+        @if (cpValido)   { <span class="cp-ok">✓ {{ colonias.length }} colonias encontradas</span> }
       </label>
       <input
         type="text"
