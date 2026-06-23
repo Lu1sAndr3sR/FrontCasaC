@@ -1,8 +1,8 @@
-<div class="inventory-page">
+﻿<div class="inventory-page">
 
   <div class="top-bar">
     <div class="top-left">
-      <img src="assets/logoC.png" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
+      <img [src]="negocioService.logoActivo" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
     </div>
 
     <div class="top-center">
@@ -28,7 +28,11 @@
       <div class="cajero-label">
         CAJERO: <span style="color: #fff; font-weight: 400; text-transform: uppercase;">{{ nombreCajero }}</span>
       </div>
+      <div class="sucursal-badge">
+        🏬 {{ sucursalActivaService.sucursalActiva?.nombre || 'Sin sucursal' }}
+      </div>
       <div class="datetime">{{ fechaActual }} &nbsp; - &nbsp; {{ horaActual }}</div>
+      <app-topbar-perfil></app-topbar-perfil>
     </div>
   </div>
 
@@ -44,6 +48,11 @@
         <button class="btn-filter" [class.active]="selectedFilter==='todos'" (click)="selectFilter('todos')">Todos</button>
         <button class="btn-filter" [class.active]="selectedFilter==='bajo'" (click)="selectFilter('bajo')">Bajo Stock </button>
         <button class="btn-filter" [class.active]="selectedFilter==='categoria'" (click)="openCategorias()">Categorías</button>
+        <label class="btn-filter btn-importar" [class.cargando]="importando">
+          <input type="file" accept=".xlsx" style="display:none" (change)="onArchivoExcel($event)" [disabled]="importando">
+          {{ importando ? 'Importando...' : '⬆ Importar Excel' }}
+        </label>
+        <button class="btn-filter btn-catalogo" (click)="abrirCatalogo()">📦 Catálogo Base</button>
       </div>
     </div>
 
@@ -57,7 +66,13 @@
         <div>Acciones</div>
       </div>
 
-      <div class="table-body">
+      <!-- Spinner de carga -->
+      <div class="inv-loading" *ngIf="cargando">
+        <div class="inv-spinner"></div>
+        <span>Cargando productos…</span>
+      </div>
+
+      <div class="table-body" [class.inv-blur]="cargando">
         @for (p of filtered; track p.producto_id) {
           <div class="row">
             <div class="cell name">
@@ -70,15 +85,14 @@
             <div class="cell price" style="color: #2d6cdf; font-weight: 600;">
                 ${{ p.precio_mayoreo | number:'1.2-2' }}
             </div>
-            
-            <div class="cell stock" [class.low]="p.stock_actual <= 5">
-              {{ p.stock_actual }}
+
+            <div class="cell stock-ctrl">
+              <button class="btn-stock entrada" title="Surtir (Entrada)" (click)="abrirModalStock(p, 'ENTRADA')">+</button>
+              <span class="stock-num" [class.low]="p.stock_actual <= (p.stock_minimo ?? 5)">{{ p.stock_actual }}</span>
+              <button class="btn-stock salida" title="Salida / Pérdida" (click)="abrirModalStock(p, 'SALIDA')">−</button>
             </div>
-            
+
             <div class="cell actions">
-              <button class="icon-stock" title="Surtir (Entrada)" (click)="abrirModalStock(p, 'ENTRADA')">📥</button>
-              <button class="icon-stock warn" title="Merma (Salida)" (click)="abrirModalStock(p, 'AJUSTE')">📉</button>
-              
               <button class="link" (click)="editar(p)">Editar</button>
               <button class="icon-del" (click)="eliminar(p)">🗑️</button>
             </div>
@@ -88,6 +102,16 @@
             Sin resultados.
           </div>
         }
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="inv-pagination" *ngIf="totalPaginas > 1 || totalProductos > 0">
+      <span class="inv-total">{{ totalProductos }} productos</span>
+      <div class="inv-pages">
+        <button class="inv-page-btn" [disabled]="paginaActual <= 1 || cargando" (click)="irAPagina(paginaActual - 1)">‹</button>
+        <span class="inv-page-info">{{ paginaActual }} / {{ totalPaginas }}</span>
+        <button class="inv-page-btn" [disabled]="paginaActual >= totalPaginas || cargando" (click)="irAPagina(paginaActual + 1)">›</button>
       </div>
     </div>
 
@@ -109,98 +133,317 @@
 
   <div class="modal-backdrop" *ngIf="modalAgregar">
     <div class="modal modal-agregar">
-      <h3>Nuevo Producto</h3>
-      <div class="form-row">
-        <div class="form-group">
-            <label>Nombre del producto *</label>
-            <input type="text" [(ngModel)]="nuevo.nombre" placeholder="Ej. Cemento Gris">
-        </div>
-        <div class="form-group">
-            <label>Código de Barras *</label>
-            <input type="text" [(ngModel)]="nuevo.barras" placeholder="Escanea aquí">
+    <div class="modal-scroll-body">
+
+      <!-- Vista previa en vivo -->
+      <div class="modal-preview">
+        <div class="preview-nombre">{{ nuevo.nombre || 'Nombre del producto' }}</div>
+        <div class="preview-meta">
+          <span class="preview-sku">{{ nuevo.barras || 'Código de barras' }}</span>
+          <span class="preview-cat" *ngIf="nuevo.categoria">{{ nuevo.categoria }}</span>
+          <span class="preview-precio" *ngIf="nuevo.precioMenudeo > 0">\${{ nuevo.precioMenudeo | number:'1.2-2' }}</span>
         </div>
       </div>
+
+      <!-- Sección: Info básica -->
+      <div class="form-seccion"><span>📋 Información básica</span></div>
+
+      <div class="form-row">
+        <div class="form-group" style="position:relative">
+          <label>Nombre del producto <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="nuevo.nombre" placeholder="Ej. Cemento Gris 50kg"
+            (input)="buscarEnCatalogo(nuevo.nombre)"
+            (blur)="mostrarCatalogoSugerencias = false">
+          @if (mostrarCatalogoSugerencias && catalogoSugerencias.length > 0) {
+            <div class="catalogo-dropdown">
+              @for (item of catalogoSugerencias; track item.catalogo_id) {
+                <div class="catalogo-item" (mousedown)="aplicarSugerenciaCatalogo(item)">
+                  <span class="cat-nombre">{{ item.nombre }}</span>
+                  @if (item.categoria_sugerida) {
+                    <span class="cat-badge">{{ item.categoria_sugerida }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label>Código de Barras <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="nuevo.barras" placeholder="Escanea o escribe">
+        </div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
-            <label>Categoría</label>
-            <input list="lista-categorias" [(ngModel)]="nuevo.categoria" placeholder="Escribe o selecciona">
-            <datalist id="lista-categorias">
-                <option *ngFor="let c of categorias" [value]="c"></option>
-                <option value="Herramientas"></option>
-                <option value="Plomería"></option>
-                <option value="Electricidad"></option>
-            </datalist>
+          <label>Categoría</label>
+          <select [(ngModel)]="nuevo.categoria" (ngModelChange)="onCategoriaChange()">
+            <option value="">— Selecciona —</option>
+            <option *ngFor="let c of categoriasOpciones" [value]="c">{{ c }}</option>
+          </select>
         </div>
+        <div class="form-group">
+          <label>Descripción <span class="hint-label">opcional</span></label>
+          <input type="text" [(ngModel)]="nuevo.descripcion" placeholder="Marca, medida, especificación…">
+        </div>
+      </div>
+
+      <!-- Sección: Precios -->
+      <div class="form-seccion"><span>💰 Precios</span></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio Público <span class="req">*</span></label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="nuevo.precioMenudeo" (ngModelChange)="onPrecioMenudeoChange()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            Precio Mayoreo
+            <span class="auto-badge" *ngIf="nuevo._mayoreoAuto">auto 88%</span>
+          </label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="nuevo.precioMayoreo" (focus)="nuevo._mayoreoAuto = false">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio Oferta <span class="hint-label">0 = sin oferta</span></label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="nuevo.precioOferta">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mín. para Mayoreo <span class="hint-label">0 = desactivado</span></label>
+          <input type="number" min="0" [(ngModel)]="nuevo.minimoMayoreo" placeholder="Ej. 10 unidades">
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-group short">
-            <label>Stock Mínimo</label>
-            <input type="number" [(ngModel)]="nuevo.stockMinimo">
+          <label>Stock Mínimo <span class="hint-label">alerta de reposición</span></label>
+          <input type="number" min="0" [(ngModel)]="nuevo.stockMinimo">
+        </div>
+        <div class="form-group"></div>
+      </div>
+
+      <!-- Sección: SAT -->
+      <div class="form-seccion sat-seccion">
+        <span>🧾 Datos SAT</span>
+        <span class="sat-hint">Necesario para emitir facturas</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Clave SAT <span class="hint-label">se autoasigna según categoría</span></label>
+          <div class="sat-field">
+            <input type="text" [(ngModel)]="nuevo.claveSat" placeholder="01010101" class="sat-clave-input">
+            <div class="sat-buscar-wrap">
+              <input type="text" [(ngModel)]="satSearchNuevo" placeholder="Buscar clave por descripción…"
+                     (ngModelChange)="onClaveSatInput($event, 'nuevo')">
+              <div class="sat-dropdown" *ngIf="resultadosClaveSat.length > 0">
+                <div class="sat-item" *ngFor="let r of resultadosClaveSat"
+                     (click)="seleccionarClaveSat(r, 'nuevo')">
+                  <span class="sat-clave-tag">{{ r.clave }}</span>
+                  <span class="sat-desc-tag">{{ r.descripcion }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
       <div class="form-row">
         <div class="form-group">
-            <label>Precio Público</label>
-            <input type="number" [(ngModel)]="nuevo.precioMenudeo">
+          <label>Unidad SAT</label>
+          <select [(ngModel)]="nuevo.claveUnidadSat">
+            <option *ngFor="let u of unidadesSat" [value]="u.clave">{{ u.clave }} — {{ u.nombre }}</option>
+          </select>
         </div>
         <div class="form-group">
-            <label>Precio Mayoreo</label>
-            <input type="number" [(ngModel)]="nuevo.precioMayoreo">
+          <label>Objeto de Impuesto</label>
+          <select [(ngModel)]="nuevo.objetoImp">
+            <option value="01">01 — No objeto de impuesto</option>
+            <option value="02">02 — Sí objeto de impuesto</option>
+            <option value="03">03 — Sí objeto y no obligado</option>
+          </select>
         </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn cancel" (click)="cerrarModalAgregar()">Cancelar</button>
-        <button class="btn save" (click)="guardarProducto()">Guardar</button>
-      </div>
+
+    </div><!-- /modal-scroll-body -->
+    <div class="modal-footer">
+      <button class="btn cancel" (click)="cerrarModalAgregar()">Cancelar</button>
+      <button class="btn save btn-save-pro" (click)="guardarProducto()">✚ Agregar Producto</button>
+    </div>
     </div>
   </div>
 
   <div class="modal-backdrop" *ngIf="modalEditar">
     <div class="modal modal-agregar">
-      <h3>Editar Producto</h3>
+    <div class="modal-scroll-body">
+
+      <!-- Vista previa en vivo -->
+      <div class="modal-preview modal-preview-edit">
+        <div class="preview-nombre">{{ productoEditando.nombre }}</div>
+        <div class="preview-meta">
+          <span class="preview-sku">{{ productoEditando.codigo_barras }}</span>
+          <span class="preview-cat" *ngIf="productoEditando.categoria">{{ productoEditando.categoria }}</span>
+          <span class="preview-stock" [class.stock-low]="(productoEditando.stock_actual ?? 0) <= (productoEditando.stock_minimo ?? 5)">
+            Stock: {{ productoEditando.stock_actual }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Sección: Info básica -->
+      <div class="form-seccion"><span>📋 Información básica</span></div>
+
       <div class="form-row">
         <div class="form-group">
-            <label>Producto</label>
-            <input type="text" [value]="productoEditando.nombre" disabled style="opacity:0.6; cursor:not-allowed;">
+          <label>Nombre del Producto</label>
+          <input type="text" [(ngModel)]="productoEditando.nombre">
         </div>
         <div class="form-group">
-            <label>Código</label>
-            <input type="text" [value]="productoEditando.codigo_barras" disabled style="opacity:0.6; cursor:not-allowed;">
+          <label>Código de Barras</label>
+          <input type="text" [(ngModel)]="productoEditando.codigo_barras">
         </div>
       </div>
+
       <div class="form-row">
         <div class="form-group">
-            <label style="color:#81c784;">Precio Público ($)</label>
-            <input type="number" [(ngModel)]="productoEditando.precio_menudeo">
+          <label>Categoría</label>
+          <select [(ngModel)]="productoEditando.categoria">
+            <option *ngFor="let c of categoriasOpciones" [value]="c">{{ c }}</option>
+          </select>
         </div>
         <div class="form-group">
-            <label style="color:#81c784;">Stock Actual (Solo lectura)</label>
-            <input type="number" [value]="productoEditando.stock_actual" disabled style="opacity:0.6; cursor:not-allowed;">
+          <label>Descripción <span class="hint-label">opcional</span></label>
+          <input type="text" [(ngModel)]="productoEditando.descripcion" placeholder="Marca, medida, especificación…">
         </div>
       </div>
+
+      <!-- Sección: Precios -->
+      <div class="form-seccion"><span>💰 Precios</span></div>
+
       <div class="form-row">
-         <div class="form-group">
-            <label>Precio Mayoreo ($)</label>
-            <input type="number" [(ngModel)]="productoEditando.precio_mayoreo">
-         </div>
-         <div class="form-group"></div>
+        <div class="form-group">
+          <label>Precio Público</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="productoEditando.precio_menudeo">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Precio Mayoreo</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="productoEditando.precio_mayoreo">
+          </div>
+        </div>
       </div>
-      <div class="modal-actions">
-        <button class="btn cancel" (click)="cerrarModalEditar()">Cancelar</button>
-        <button class="btn save" (click)="guardarEdicion()">Guardar Cambios</button>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Precio Oferta <span class="hint-label">0 = sin oferta</span></label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" min="0" [(ngModel)]="productoEditando.precio_oferta">
+          </div>
+        </div>
+        <div class="form-group short">
+          <label>Mín. para Mayoreo</label>
+          <input type="number" min="0" [(ngModel)]="productoEditando.minimo_mayoreo">
+        </div>
       </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Stock Actual <span class="hint-label">ajusta con el botón +/− de la tabla</span></label>
+          <input type="number" [value]="productoEditando.stock_actual" disabled class="input-readonly">
+        </div>
+        <div class="form-group short">
+          <label>Stock Mínimo <span class="hint-label">alerta de reposición</span></label>
+          <input type="number" min="0" [(ngModel)]="productoEditando.stock_minimo">
+        </div>
+      </div>
+
+      <!-- Sección: SAT -->
+      <div class="form-seccion sat-seccion">
+        <span>🧾 Datos SAT</span>
+        <span class="sat-hint">Necesario para emitir facturas</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Clave SAT <span class="hint-label">(Producto/Servicio)</span></label>
+          <div class="sat-field">
+            <input type="text" [(ngModel)]="productoEditando.clave_sat" placeholder="01010101" class="sat-clave-input">
+            <div class="sat-buscar-wrap">
+              <input type="text" [(ngModel)]="satSearchEditar" placeholder="Buscar clave por descripción…"
+                     (ngModelChange)="onClaveSatInput($event, 'editar')">
+              <div class="sat-dropdown" *ngIf="resultadosClaveSat.length > 0">
+                <div class="sat-item" *ngFor="let r of resultadosClaveSat"
+                     (click)="seleccionarClaveSat(r, 'editar')">
+                  <span class="sat-clave-tag">{{ r.clave }}</span>
+                  <span class="sat-desc-tag">{{ r.descripcion }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Unidad SAT</label>
+          <select [(ngModel)]="productoEditando.clave_unidad_sat">
+            <option *ngFor="let u of unidadesSat" [value]="u.clave">{{ u.clave }} — {{ u.nombre }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Objeto de Impuesto</label>
+          <select [(ngModel)]="productoEditando.objeto_imp">
+            <option value="01">01 — No objeto de impuesto</option>
+            <option value="02">02 — Sí objeto de impuesto</option>
+            <option value="03">03 — Sí objeto y no obligado</option>
+          </select>
+        </div>
+      </div>
+
+    </div><!-- /modal-scroll-body -->
+    <div class="modal-footer">
+      <button class="btn cancel" (click)="cerrarModalEditar()">Cancelar</button>
+      <button class="btn save btn-save-pro" (click)="guardarEdicion()">💾 Guardar Cambios</button>
+    </div>
     </div>
   </div>
 
   <div class="modal-backdrop" *ngIf="modalStock">
     <div class="modal modal-agregar">
       <h3 [style.color]="tipoMovimiento === 'ENTRADA' ? '#4cd96f' : '#ff5f5f'">
-        {{ tipoMovimiento === 'ENTRADA' ? '📥 Recibir Mercancía' : '📉 Reportar Pérdida' }}
+        {{ tipoMovimiento === 'ENTRADA' ? '📥 Recibir Mercancía' : (tipoMovimiento === 'SALIDA' ? '📤 Salida de Mercancía' : '📉 Pérdida de Mercancía') }}
       </h3>
-      
+
       <p style="margin-bottom: 15px; color: #aaa; font-size: 14px;">
-        Producto: <strong style="color: #fff;">{{ productoStock?.nombre }}</strong>
-        <br>
+        Producto: <strong style="color: #fff;">{{ productoStock?.nombre }}</strong><br>
         Stock Actual: <strong style="color: #fff;">{{ productoStock?.stock_actual }}</strong>
       </p>
+
+      <div class="form-row" *ngIf="tipoMovimiento !== 'ENTRADA'">
+        <div class="form-group">
+          <label>Tipo de baja</label>
+          <div style="display: flex; gap: 10px; margin-top: 4px;">
+            <button class="btn" [class.save]="tipoMovimiento === 'SALIDA'" [class.cancel]="tipoMovimiento !== 'SALIDA'"
+                    (click)="tipoMovimiento = 'SALIDA'; motivoMov = ''">Salida voluntaria</button>
+            <button class="btn" [class.save]="tipoMovimiento === 'PERDIDA'" [class.cancel]="tipoMovimiento !== 'PERDIDA'"
+                    (click)="tipoMovimiento = 'PERDIDA'; motivoMov = ''">Pérdida / Merma</button>
+          </div>
+        </div>
+      </div>
 
       <div class="form-row">
         <div class="form-group">
@@ -209,19 +452,119 @@
         </div>
       </div>
 
+      <div class="form-row" *ngIf="tipoMovimiento === 'PERDIDA'">
+        <div class="form-group">
+          <label>Motivo (opcional)</label>
+          <select [(ngModel)]="motivoMov">
+            <option value="">— Sin motivo —</option>
+            <option value="ROBO">Robo</option>
+            <option value="DAÑO">Daño</option>
+            <option value="CADUCADO">Caducado</option>
+            <option value="MERMA">Merma</option>
+          </select>
+        </div>
+      </div>
+
       <div class="form-row">
         <div class="form-group">
-          <label>Motivo / Observación</label>
-          <input type="text" [(ngModel)]="razonMov" 
-                 [placeholder]="tipoMovimiento === 'ENTRADA' ? 'Ej: Factura 504' : 'Ej: Se rompió / Caducó'">
+          <label>Observaciones (opcional)</label>
+          <input type="text" [(ngModel)]="razonMov"
+                 list="lista-observaciones"
+                 [placeholder]="tipoMovimiento === 'ENTRADA' ? 'Ej: Compra a proveedor, Factura 504…' : 'Ej: Conteo físico, Ajuste de inventario…'">
+          <datalist id="lista-observaciones">
+            <option *ngFor="let s of sugerenciasObservacion[tipoMovimiento]" [value]="s"></option>
+          </datalist>
         </div>
       </div>
 
       <div class="modal-actions">
         <button class="btn cancel" (click)="cerrarModalStock()">Cancelar</button>
-        <button class="btn save" (click)="guardarMovimiento()">Confirmar Movimiento</button>
+        <button class="btn save" (click)="guardarMovimiento()">Confirmar</button>
       </div>
     </div>
   </div>
 
 </div>
+
+<!-- ── Drawer catálogo base ──────────────────────────────────────────────── -->
+<ng-container *ngIf="drawerCatalogo">
+  <div class="cat-overlay" (click)="cerrarCatalogo()"></div>
+
+  <div class="cat-drawer">
+    <!-- Header -->
+    <div class="cat-header">
+      <div>
+        <h3 class="cat-title">📦 Catálogo Base</h3>
+        <span class="cat-subtitle">{{ catTotal }} productos disponibles</span>
+      </div>
+      <button class="cat-close" (click)="cerrarCatalogo()">✕</button>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="cat-search-row">
+      <input class="cat-search" type="text" placeholder="Buscar por nombre, código o categoría…"
+             [(ngModel)]="catQ" (ngModelChange)="onCatBusqueda()">
+    </div>
+
+    <!-- Chips de categoría -->
+    <div class="cat-chips" *ngIf="catCategorias.length > 0">
+      <button *ngFor="let c of catCategorias" class="cat-chip"
+              [class.active]="catCategoria === c"
+              (click)="filtrarPorCategoria(c)">{{ c }}</button>
+    </div>
+
+    <!-- Lista -->
+    <div class="cat-body">
+      <div class="cat-loading" *ngIf="catCargando">Cargando…</div>
+
+      <div class="cat-empty" *ngIf="!catCargando && catItems.length === 0">
+        <p>No hay productos en el catálogo base.<br><span style="font-size:12px;color:#aaa;">El superadmin debe importar el Excel primero.</span></p>
+      </div>
+
+      <div class="cat-list" *ngIf="!catCargando && catItems.length > 0">
+        <div class="cat-item" *ngFor="let item of catItems"
+             [class.adoptado]="item.ya_adoptado"
+             (click)="!item.ya_adoptado && toggleSeleccion(item.catalogo_id)">
+          <input type="checkbox" class="cat-check"
+                 [checked]="seleccionados.has(item.catalogo_id)"
+                 [disabled]="item.ya_adoptado"
+                 (click)="$event.stopPropagation()">
+          <div class="cat-item-info">
+            <span class="cat-item-nombre">{{ item.nombre }}</span>
+            <span class="cat-item-meta">
+              <span class="cat-cat-badge">{{ item.categoria_sugerida || 'Sin categoría' }}</span>
+              <span *ngIf="item.codigo_barras" class="cat-codigo">{{ item.codigo_barras }}</span>
+            </span>
+          </div>
+          <div class="cat-item-prices">
+            <span class="cat-price">\${{ item.precio_menudeo | number:'1.2-2' }}</span>
+            <span class="cat-badge-adoptado" *ngIf="item.ya_adoptado">Ya en inventario</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="cat-pagination" *ngIf="catPages > 1">
+      <button class="cat-page-btn" [disabled]="catPage <= 1" (click)="catPage = catPage - 1; cargarCatalogo()">← Anterior</button>
+      <span>{{ catPage }} / {{ catPages }}</span>
+      <button class="cat-page-btn" [disabled]="catPage >= catPages" (click)="catPage = catPage + 1; cargarCatalogo()">Siguiente →</button>
+    </div>
+
+    <!-- Footer acciones -->
+    <div class="cat-footer">
+      <span class="cat-selected-count" *ngIf="seleccionados.size > 0">{{ seleccionados.size }} seleccionados</span>
+      <span class="cat-selected-count" *ngIf="seleccionados.size === 0" style="color:#aaa;">Selecciona productos con el checkbox</span>
+      <div class="cat-footer-btns">
+        <button class="cat-btn-adopt" [disabled]="seleccionados.size === 0 || catAdoptando"
+                (click)="adoptarSeleccionados()">
+          {{ catAdoptando ? 'Adoptando…' : 'Adoptar seleccionados' }}
+        </button>
+        <button class="cat-btn-all" [disabled]="catAdoptando || catTotal === 0"
+                (click)="adoptarTodoCatalogo()">
+          Adoptar todo ({{ catTotal }})
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-container>

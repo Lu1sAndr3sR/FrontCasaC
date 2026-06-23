@@ -1,150 +1,145 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TopbarPerfilComponent } from '../../components/topbar-perfil/topbar-perfil.component';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http';
+import { Subscription, interval } from 'rxjs';
 import { CajaService } from '../../services/caja.service';
+import { RelojService } from '../../services/reloj.service';
+import { NegocioService } from '../../services/negocio.service';
+import { ToastService } from '../../services/toast.service';
+import { ConfirmService } from '../../services/confirm.service';
+import { SucursalActivaService } from '../../services/sucursal-activa.service';
+import { CerrarCajaPayload } from '../../models/interfaces';
 
 @Component({
   selector: 'app-cortecaja',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink, HttpClientModule],
+  imports: [FormsModule, CommonModule, RouterLink, TopbarPerfilComponent],
   templateUrl: './cortecaja.component.html',
   styleUrls: ['./cortecaja.component.css']
 })
-export class CortecajaComponent implements OnInit {
+export class CortecajaComponent implements OnInit, OnDestroy {
 
   cajaId: number = 0;
-  usuarioId: number = 1; 
+  usuarioId: number = 1;
   nombreCajero: string = 'Cajero';
+
+  fechaActual: string = '';
+  horaActual: string = '';
 
   montoInicial: number = 0;
   entradaDinero: number = 0;
   salidaEfectivo: number = 0;
+  totalDevoluciones: number = 0;
+  totalVentas: number = 0;
 
-  montoFinal: number | null = null; 
+  montoFinal: number | null = null;
+  cerrando = false;
 
-  showEgresoModal: boolean = false;
-  montoEgreso: number | null = null;
-  conceptoEgreso: string = '';
+  private clockSub: Subscription | undefined;
 
   constructor(
     private router: Router,
-    private cajaService: CajaService
+    private cajaService: CajaService,
+    private relojService: RelojService,
+    private cdr: ChangeDetectorRef,
+    public negocioService: NegocioService,
+    private toastService: ToastService,
+    private confirmService: ConfirmService,
+    private sucursalActivaService: SucursalActivaService
   ) {}
 
   ngOnInit() {
-    // 1. Recuperar ID de Caja Activa
-    const idCajaGuardado = localStorage.getItem('cajaAbiertaId');
+    this.actualizarTiempo();
+    this.clockSub = interval(1000).subscribe(() => {
+      this.actualizarTiempo();
+      this.cdr.detectChanges();
+    });
+
+    const cajaKey = `cajaAbiertaId-${this.sucursalActivaService.sucursalId}`;
+    const idCajaGuardado = localStorage.getItem(cajaKey);
     if (!idCajaGuardado || Number(idCajaGuardado) === 0) {
-        alert("⚠️ No se encontró una sesión de caja activa. Serás redirigido al Dashboard.");
-        this.router.navigate(['/dashboard']);
-        return;
+      this.toastService.show('No se encontró una sesión de caja activa.', 'error');
+      this.router.navigate(['/dashboard']);
+      return;
     }
     this.cajaId = Number(idCajaGuardado);
-    
-    // 2. Recuperar Usuario Real
+
     const idUserStorage = Number(localStorage.getItem('idUsuario'));
-    if (idUserStorage > 0) {
-        this.usuarioId = idUserStorage;
-    } else {
-        // Fallback solo si falló el login
-        console.warn("⚠️ No se encontró ID de usuario, usando default (1)");
-        this.usuarioId = 1;
-    }
-    
+    this.usuarioId = idUserStorage > 0 ? idUserStorage : 1;
+
     this.nombreCajero = localStorage.getItem('nombreCajero') || 'Cajero';
     this.cargarDatosCorte();
+  }
+
+  ngOnDestroy() {
+    this.clockSub?.unsubscribe();
+  }
+
+  actualizarTiempo() {
+    this.fechaActual = this.relojService.obtenerFechaActual();
+    this.horaActual = this.relojService.obtenerHoraActual(true);
   }
 
   cargarDatosCorte() {
     this.cajaService.obtenerTotales(this.cajaId).subscribe({
       next: (data) => {
-        this.montoInicial = Number(data.montoInicial) || 0;
-        this.entradaDinero = Number(data.totalVentasEfectivo) || 0;
-        this.salidaEfectivo = Number(data.totalEgresos) || 0;
+        this.montoInicial       = Number(data.montoInicial)      || 0;
+        this.totalVentas        = Number(data.totalVentas)       || 0;
+        this.entradaDinero      = Number(data.totalIngresos)     || 0;
+        this.salidaEfectivo     = Number(data.totalEgresos)      || 0;
+        this.totalDevoluciones  = Number(data.totalDevoluciones) || 0;
       },
-      error: (e) => {
-        console.error(e);
-        alert('Error al cargar datos del corte.');
+      error: () => {
+        this.toastService.show('Error al cargar datos del corte.', 'error');
       }
     });
   }
 
   get montoEsperado(): number {
-    return this.montoInicial + this.entradaDinero - this.salidaEfectivo;
+    return this.montoInicial + this.totalVentas + this.entradaDinero - this.salidaEfectivo - this.totalDevoluciones;
   }
 
   get diferencia(): number {
-    return (this.montoFinal || 0) - this.montoEsperado;
+    if (this.montoFinal === null) return 0;
+    return this.montoFinal - this.montoEsperado;
   }
 
-  // --- EGRESOS ---
-  abrirModalEgreso() {
-    this.showEgresoModal = true;
-    this.montoEgreso = null;
-    this.conceptoEgreso = '';
-  }
 
-  registrarEgreso() {
-    if (!this.montoEgreso || this.montoEgreso <= 0) {
-      alert('Debes ingresar un monto válido.');
-      return;
-    }
-
-    const datosEgreso = {
-      caja_id: this.cajaId,
-      usuario_id: this.usuarioId,
-      monto: this.montoEgreso,
-      concepto: this.conceptoEgreso,
-      tipo_movimiento: 'EGRESO'
-    };
-
-    this.cajaService.registrarMovimiento(datosEgreso).subscribe({
-      next: () => {
-        alert('Salida registrada.');
-        this.showEgresoModal = false;
-        this.cargarDatosCorte();
-      },
-      error: () => alert('Fallo al registrar movimiento.')
-    });
-  }
-
-  // --- CIERRE FINAL ---
-  cerrarCaja() {
+  async cerrarCaja() {
+    if (this.cerrando) return;
     if (this.montoFinal === null || this.montoFinal === undefined || this.montoFinal < 0) {
-        alert("⚠️ Por favor cuenta el dinero físico e ingresa el Monto Final.");
-        return;
+      this.toastService.show('Por favor ingresa el Monto Final contado.', 'error');
+      return;
     }
 
     const final = Number(this.montoFinal);
     const diferencia = final - this.montoEsperado;
 
-    const mensaje = `¿Confirmar Cierre de Caja?\n\n` +
-                    `💰 Esperado: $${this.montoEsperado.toFixed(2)}\n` +
-                    `💵 Físico: $${final.toFixed(2)}\n` +
-                    `📉 Diferencia: $${diferencia.toFixed(2)}`;
+    const ok = await this.confirmService.abrir(
+      '¿Confirmar Cierre de Caja?',
+      `Esperado: $${this.montoEsperado.toFixed(2)}   Físico: $${final.toFixed(2)}   Diferencia: $${diferencia.toFixed(2)}`
+    );
+    if (!ok) return;
 
-    if (!confirm(mensaje)) return;
-
-    const datosCierre = {
+    this.cerrando = true;
+    const datosCierre: CerrarCajaPayload = {
       caja_id: this.cajaId,
-      usuario_cierre_id: this.usuarioId, // Enviamos el ID correcto
+      usuario_cierre_id: this.usuarioId,
       montoFinal: final,
       diferencia: diferencia
     };
 
-    console.log("Enviando al servicio:", datosCierre);
-
     this.cajaService.cerrarCaja(datosCierre).subscribe({
       next: () => {
-        alert('✅ Caja cerrada correctamente. Turno finalizado.');
-        localStorage.removeItem('cajaAbiertaId'); 
+        this.toastService.show('Caja cerrada correctamente. Turno finalizado.', 'ok');
+        localStorage.removeItem(`cajaAbiertaId-${this.sucursalActivaService.sucursalId}`);
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
-        console.error(err);
-        alert('❌ Error al cerrar caja.');
+      error: () => {
+        this.toastService.show('Error al cerrar caja.', 'error');
+        this.cerrando = false;
       }
     });
   }

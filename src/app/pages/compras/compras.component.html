@@ -1,0 +1,188 @@
+<div class="page-container">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Compras</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-hora">{{ hora }}</span>
+      <span class="topbar-empresa">{{ nombreNegocio }}</span>
+      <app-topbar-perfil></app-topbar-perfil>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="toolbar">
+      <h2>Entradas de Inventario</h2>
+      <button class="btn-primary" (click)="abrirNueva()">+ Nueva compra</button>
+    </div>
+
+    @if (cargando) {
+      <div class="estado-vacio">Cargando...</div>
+    } @else if (compras.length === 0) {
+      <div class="estado-vacio">
+        <p>🛒 Sin compras registradas</p>
+        <small>Registra tus entradas de mercancía para actualizar el inventario automáticamente</small>
+      </div>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Folio</th>
+              <th>Proveedor</th>
+              <th>Productos</th>
+              <th class="text-right">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of compras; track c.compra_id) {
+              <tr>
+                <td>{{ formatearFecha(c.fecha!) }}</td>
+                <td>{{ c.folio || '—' }}</td>
+                <td>{{ c.proveedor_nombre || '—' }}</td>
+                <td>{{ c.detalles?.length || 0 }} producto(s)</td>
+                <td class="text-right precio">{{ c.total | currency:'MXN':'symbol-narrow' }}</td>
+                <td><button class="btn-icon" (click)="verDetalle(c)" title="Ver detalle">👁️</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal nueva compra -->
+@if (modalAbierto) {
+  <div class="modal-overlay" (click)="modalAbierto = false">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <h3>Registrar compra / entrada</h3>
+
+      <div class="campo-row">
+        <div class="campo">
+          <label>Proveedor</label>
+          <select [(ngModel)]="nuevaCompra.proveedor_id">
+            <option [ngValue]="null">Sin proveedor</option>
+            @for (p of proveedores; track p.proveedor_id) {
+              <option [ngValue]="p.proveedor_id">{{ p.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Folio / Factura</label>
+          <input type="text" [(ngModel)]="nuevaCompra.folio" placeholder="Ej. F-001">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Notas</label>
+        <input type="text" [(ngModel)]="nuevaCompra.notas" placeholder="Observaciones opcionales">
+      </div>
+
+      <div class="separador-items">Productos a ingresar</div>
+
+      <!-- Agregar item -->
+      <div class="item-form">
+        <div class="campo flex-3">
+          <label>Producto</label>
+          <div class="autocomplete-wrapper">
+            <input type="text" [(ngModel)]="busquedaProducto"
+              (input)="filtrarProductos()"
+              placeholder="Buscar o escribir nombre...">
+            @if (productosFiltrados.length > 0) {
+              <div class="autocomplete-lista">
+                @for (p of productosFiltrados; track p.producto_id) {
+                  <div class="autocomplete-item" (click)="seleccionarProducto(p)">
+                    {{ p.nombre }} <span>{{ p.codigo_barras }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        <div class="campo flex-1">
+          <label>Cantidad</label>
+          <input type="number" [(ngModel)]="itemNuevo.cantidad" min="1" (change)="actualizarSubtotal()">
+        </div>
+        <div class="campo flex-1">
+          <label>Costo unit.</label>
+          <input type="number" [(ngModel)]="itemNuevo.costo_unitario" min="0" step="0.01" (input)="actualizarSubtotal()">
+        </div>
+        <div class="campo flex-1 campo-subtotal">
+          <label>Subtotal</label>
+          <span>{{ itemNuevo.subtotal | currency:'MXN':'symbol-narrow' }}</span>
+        </div>
+        <button class="btn-agregar" (click)="agregarItem()" title="Agregar">+</button>
+      </div>
+
+      <!-- Lista items -->
+      @if (nuevaCompra.items.length > 0) {
+        <div class="items-lista">
+          @for (item of nuevaCompra.items; track $index) {
+            <div class="item-row">
+              <span class="item-nombre">{{ item.nombre_producto }}</span>
+              <span>{{ item.cantidad }} × {{ item.costo_unitario | currency:'MXN':'symbol-narrow' }}</span>
+              <span class="item-sub">= {{ item.subtotal | currency:'MXN':'symbol-narrow' }}</span>
+              <button class="btn-quitar" (click)="quitarItem($index)">✕</button>
+            </div>
+          }
+          <div class="items-total">
+            Total: <strong>{{ totalNuevaCompra | currency:'MXN':'symbol-narrow' }}</strong>
+          </div>
+        </div>
+      }
+
+      <div class="toggle-caja">
+        <label>
+          <input type="checkbox" [(ngModel)]="nuevaCompra.descontar_de_caja">
+          💰 Descontar del efectivo en caja (registra egreso automáticamente)
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="modalAbierto = false">Cancelar</button>
+        <button class="btn-primary" (click)="guardar()" [disabled]="nuevaCompra.items.length === 0">
+          Registrar entrada
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal detalle -->
+@if (modalDetalle) {
+  <div class="modal-overlay" (click)="modalDetalle = null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Detalle de compra</h3>
+      <p><strong>Proveedor:</strong> {{ modalDetalle.proveedor_nombre || '—' }}</p>
+      <p><strong>Folio:</strong> {{ modalDetalle.folio || '—' }}</p>
+      <p><strong>Fecha:</strong> {{ formatearFecha(modalDetalle.fecha!) }}</p>
+      @if (modalDetalle.notas) {
+        <p><strong>Notas:</strong> {{ modalDetalle.notas }}</p>
+      }
+      <table class="tabla" style="margin-top:12px">
+        <thead><tr><th>Producto</th><th>Cant.</th><th>Costo</th><th>Subtotal</th></tr></thead>
+        <tbody>
+          @for (d of modalDetalle.detalles; track $index) {
+            <tr>
+              <td>{{ d.nombre_producto }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td>{{ d.costo_unitario | currency:'MXN':'symbol-narrow' }}</td>
+              <td>{{ d.subtotal | currency:'MXN':'symbol-narrow' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div style="text-align:right;margin-top:12px;font-weight:700">
+        Total: {{ modalDetalle.total | currency:'MXN':'symbol-narrow' }}
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" (click)="modalDetalle = null">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}

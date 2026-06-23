@@ -1,0 +1,237 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <img src="assets/logo.png" alt="SC POS" class="nav-logo">
+      <span class="brand-name">SC POS</span>
+    </div>
+    <div class="nav-links">
+      <a href="#caracteristicas">Características</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a routerLink="/login" class="btn-nav-login">Iniciar sesión</a>
+      <a routerLink="/registro" class="btn-nav-registro">Registrarse gratis</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">SC POS — Sistema para Ferreterías Mexicanas</div>
+      <h1 class="hero-title">
+        Tu ferretería, <br>
+        <span class="hero-accent">más ordenada</span> y <br>
+        <span class="hero-accent">más rentable</span>
+      </h1>
+      <p class="hero-sub">
+        Ventas, inventario, reportes, facturación CFDI y asistente con IA —
+        todo en un solo sistema diseñado para el ritmo de una ferretería real.
+      </p>
+      <div class="hero-ctas">
+        <a routerLink="/registro" class="btn-primary">Solicitar acceso gratis</a>
+        <a href="#como-funciona" class="btn-secondary">Ver cómo funciona</a>
+      </div>
+      <div class="hero-trust">
+        <span>✅ Sin instalación</span>
+        <span>✅ Facturación CFDI incluida</span>
+        <span>✅ Soporte en español</span>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="dashboard-mockup">
+        <div class="mockup-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="mockup-title">SC POS — Panel de Ventas</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-stat">
+            <div class="stat-label">Ventas hoy</div>
+            <div class="stat-val green">$18,450</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="stat-label">Tickets</div>
+            <div class="stat-val blue">47</div>
+          </div>
+          <div class="mockup-stat">
+            <div class="stat-label">Stock bajo</div>
+            <div class="stat-val orange">3 productos</div>
+          </div>
+          <div class="mockup-divider"></div>
+          <div class="mockup-row">
+            <span class="row-name">Tornillo 1/4 x 1 pulgada</span>
+            <span class="row-qty">×24</span>
+            <span class="row-price">$72.00</span>
+          </div>
+          <div class="mockup-row">
+            <span class="row-name">Llave ajustable 12 pulgadas</span>
+            <span class="row-qty">×2</span>
+            <span class="row-price">$480.00</span>
+          </div>
+          <div class="mockup-row">
+            <span class="row-name">Cable UTP Cat6 (metro)</span>
+            <span class="row-qty">×15</span>
+            <span class="row-price">$375.00</span>
+          </div>
+          <div class="mockup-total">Total: <strong>$927.00</strong></div>
+          <div class="mockup-btn">Cobrar 🛒</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARACTERÍSTICAS -->
+<section class="section-features" id="caracteristicas">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2>Todo lo que necesitas, <span class="accent">sin complicaciones</span></h2>
+      <p>Cada módulo está pensado para el día a día de una ferretería en México.</p>
+    </div>
+    <div class="features-grid">
+      @for (f of features; track f.titulo) {
+        <div class="feature-card">
+          <div class="feature-icon">{{ f.icono }}</div>
+          <h3>{{ f.titulo }}</h3>
+          <p>{{ f.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CFDI HIGHLIGHT -->
+<section class="section-cfdi">
+  <div class="section-inner two-col">
+    <div class="col-text">
+      <div class="tag-pill">Cumplimiento SAT</div>
+      <h2>Facturación <span class="accent">CFDI 4.0</span> integrada</h2>
+      <p>
+        Genera, timbra y envía facturas electrónicas directamente desde el sistema.
+        Cancela con motivo SAT, reenvía al correo de tu cliente y descarga el XML —
+        todo sin salir de la caja.
+      </p>
+      <ul class="check-list">
+        <li>✅ Emisión de CFDI 4.0</li>
+        <li>✅ Cancelación con motivo</li>
+        <li>✅ Envío automático por correo</li>
+        <li>✅ Descarga de XML</li>
+        <li>✅ Configuración de datos fiscales del emisor</li>
+      </ul>
+    </div>
+    <div class="col-visual">
+      <div class="cfdi-card">
+        <div class="cfdi-header">
+          <span class="cfdi-badge">CFDI 4.0 ✔</span>
+        </div>
+        <div class="cfdi-field"><label>RFC Emisor</label><span>XAXX010101000</span></div>
+        <div class="cfdi-field"><label>Folio</label><span>VTA-0042</span></div>
+        <div class="cfdi-field"><label>Total</label><span class="cfdi-total">$927.00</span></div>
+        <div class="cfdi-field"><label>Estado</label><span class="cfdi-estado">TIMBRADO ✓</span></div>
+        <div class="cfdi-actions">
+          <button class="cfdi-btn">📧 Enviar</button>
+          <button class="cfdi-btn">📄 XML</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MULTI-SUCURSAL -->
+<section class="section-multi" id="multi-sucursal">
+  <div class="section-inner two-col reverse">
+    <div class="col-visual">
+      <div class="multi-card">
+        <div class="branch-item active">
+          <span class="branch-dot green"></span>
+          <div>
+            <strong>Sucursal Centro</strong>
+            <small>Stock: 1,248 productos</small>
+          </div>
+          <span class="branch-badge">Principal</span>
+        </div>
+        <div class="branch-item">
+          <span class="branch-dot green"></span>
+          <div>
+            <strong>Sucursal Norte</strong>
+            <small>Stock: 892 productos</small>
+          </div>
+        </div>
+        <div class="branch-item">
+          <span class="branch-dot yellow"></span>
+          <div>
+            <strong>Sucursal Sur</strong>
+            <small>Stock bajo en 3 items</small>
+          </div>
+          <span class="branch-badge alert">⚠ Alerta</span>
+        </div>
+        <div class="branch-summary">
+          <span>3 sucursales activas</span>
+          <span class="branch-total">Ventas totales hoy: <strong>$52,300</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="col-text">
+      <div class="tag-pill">Crecimiento sin límites</div>
+      <h2>Multi-sucursal <span class="accent">sin costo extra</span></h2>
+      <p>
+        Administra todas tus sucursales desde un solo panel. Cada una tiene
+        su inventario, caja y usuarios independientes — tú ves el panorama
+        completo en tiempo real.
+      </p>
+      <ul class="check-list">
+        <li>✅ Inventario independiente por sucursal</li>
+        <li>✅ Alertas de stock en tiempo real</li>
+        <li>✅ Reportes por sucursal o consolidados</li>
+        <li>✅ Usuarios y roles por sede</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section class="section-pasos" id="como-funciona">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2>Empieza a vender <span class="accent">en 3 pasos</span></h2>
+    </div>
+    <div class="pasos-grid">
+      @for (p of pasos; track p.num) {
+        <div class="paso-card">
+          <div class="paso-num">{{ p.num }}</div>
+          <h3>{{ p.titulo }}</h3>
+          <p>{{ p.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="section-cta">
+  <div class="cta-inner">
+    <h2>¿Listo para ordenar tu ferretería?</h2>
+    <p>Solicita tu acceso y tu cuenta estará activa en menos de 24 horas.</p>
+    <a routerLink="/registro" class="btn-primary large">Registrar mi ferretería</a>
+    <p class="cta-sub">Sin tarjeta de crédito. Sin instalación. Solo regístrate.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="assets/logo.png" alt="SC POS" class="footer-logo">
+      <span class="brand-name">SC POS</span>
+    </div>
+    <div class="footer-links">
+      <a routerLink="/terminos">Términos y Condiciones</a>
+      <a routerLink="/terminos">Aviso de Privacidad</a>
+      <a routerLink="/login">Iniciar sesión</a>
+      <a routerLink="/registro">Registro</a>
+    </div>
+    <div class="footer-legal">
+      © {{ anioActual }} SC POS. Sistema de punto de venta para ferreterías en México.
+    </div>
+  </div>
+</footer>

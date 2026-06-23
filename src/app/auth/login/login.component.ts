@@ -3,6 +3,11 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MaterialModule } from '../../material.module';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { SucursalActivaService } from '../../services/sucursal-activa.service';
+import { NegocioService } from '../../services/negocio.service';
+import { ThemeService } from '../../services/theme.service';
+import { ToastService } from '../../services/toast.service';
+import { RespuestaLogin } from '../../models/interfaces';
 
 @Component({
   selector: 'app-login',
@@ -15,9 +20,13 @@ export class LoginComponent {
   loginForm: FormGroup;
 
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private sucursalActivaService: SucursalActivaService,
+    private negocioService: NegocioService,
+    private themeService: ThemeService,
+    private toastService: ToastService
   ) {
     this.loginForm = this.fb.group({
       usuario: ['', Validators.required],
@@ -29,42 +38,70 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       const { usuario, password } = this.loginForm.value;
 
-      console.log("📤 Enviando al backend:", usuario);
-
       this.authService.login(usuario, password).subscribe({
-        next: (resp: any) => {
-          console.log('Login correcto:', resp);
-          
-          // 1. Guardar Token
+        next: (resp: RespuestaLogin) => {
           localStorage.setItem('token', resp.token);
-          
-          // ⚠️ 2. GUARDAR ID DE USUARIO (ESTA ERA LA LÍNEA FALTANTE) ⚠️
-          // Intentamos buscar el ID en varias partes por si la estructura cambia
-          const idReal = resp.usuario_id || resp.usuario?.usuario_id || resp.id;
-          
+
+          const idReal = resp.usuario_id ?? resp.usuario?.usuario_id ?? resp.id;
           if (idReal) {
-             localStorage.setItem('idUsuario', idReal.toString());
-             console.log("✅ ID de Usuario guardado:", idReal);
-          } else {
-             console.error("⚠️ No se encontró ID en la respuesta del login", resp);
+            localStorage.setItem('idUsuario', idReal.toString());
           }
-          
-          // 3. Guardar Nombre
-          const nombreCajero = resp.nombre || resp.usuario?.nombre || usuario;
+
+          const nombreCajero = resp.nombre ?? resp.usuario?.nombre ?? usuario;
           localStorage.setItem('nombreCajero', nombreCajero);
 
-          // 4. Guardar Rol
           const esAdmin = (resp.rol_id === 1) ? 'true' : 'false';
           localStorage.setItem('esAdmin', esAdmin);
 
-          // 5. Guardar Login Único
-          localStorage.setItem('usuarioActual', resp.usuario?.usuario || usuario);
+          localStorage.setItem('usuarioActual', resp.usuario?.usuario ?? usuario);
 
-          this.router.navigate(['/dashboard']); 
+          if (resp.empresa_id)  localStorage.setItem('empresa_id',  resp.empresa_id.toString());
+          if (resp.sucursal_id) localStorage.setItem('sucursal_id', resp.sucursal_id.toString());
+
+          // Carga logo y nombre de la empresa desde el servidor
+          if (resp.empresa_logo) {
+            localStorage.setItem('casac-logo', resp.empresa_logo);
+            this.negocioService.logoUrl = resp.empresa_logo;
+          }
+          // Si el backend no devuelve logo, conservar el que esté cacheado
+          // (el logout ya limpia localStorage; no hace falta borrarlo aquí)
+          if (resp.empresa_nombre) {
+            localStorage.setItem('casac-nombre', resp.empresa_nombre);
+            this.negocioService.nombreNegocio = resp.empresa_nombre;
+          }
+
+          // Foto de perfil y tema por usuario
+          localStorage.setItem('casac-foto-perfil', resp.foto_perfil ?? '');
+          const usuarioId = resp.usuario_id ?? resp.usuario?.usuario_id ?? resp.id;
+          if (usuarioId) this.themeService.setUsuario(usuarioId, resp.color_tema);
+
+          // Guardar flag de superadmin
+          localStorage.setItem('esSuperAdmin', resp.es_superadmin ? 'true' : 'false');
+
+          // Auto-set sucursal activa con los datos completos del login
+          if (resp.sucursal_id && resp.sucursal_nombre) {
+            this.sucursalActivaService.setSucursal({
+              sucursal_id: resp.sucursal_id,
+              nombre:      resp.sucursal_nombre,
+              cp_sat:      resp.sucursal_cp_sat ?? '',
+              logo_b64:    resp.sucursal_logo   ?? null,
+              empresa_id:  resp.empresa_id ?? 1,
+              direccion:   '',
+              latitud:     0,
+              longitud:    0,
+              activa:      true
+            });
+          }
+
+          this.router.navigate([resp.es_superadmin ? '/superadmin' : '/dashboard']);
         },
         error: (err) => {
-          console.error(err);
-          alert('Usuario o contraseña incorrectos');
+          const msg = err?.error?.mensaje;
+          if (msg) {
+            this.toastService.show(msg, 'error');
+          } else {
+            this.toastService.show('Usuario o contraseña incorrectos', 'error');
+          }
         }
       });
     }

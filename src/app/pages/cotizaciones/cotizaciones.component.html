@@ -1,0 +1,203 @@
+<div class="window">
+
+  <!-- TOPBAR -->
+  <div class="topbar no-print">
+    <img [src]="negocioSvc.logoActivo" class="logo" (click)="goDashboard()">
+    <h2 class="titulo-pagina">Cotizaciones</h2>
+    <app-topbar-perfil></app-topbar-perfil>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-bar no-print">
+    <button class="tab-btn" [class.active]="tab === 'nueva'" (click)="cambiarTab('nueva')">+ Nueva cotización</button>
+    <button class="tab-btn" [class.active]="tab === 'historial'" (click)="cambiarTab('historial')">Historial</button>
+  </div>
+
+  <!-- ==================== TAB: NUEVA COTIZACIÓN ==================== -->
+  <div *ngIf="tab === 'nueva'" class="tab-content no-print">
+
+    <!-- Vista guardada / ticket -->
+    <div *ngIf="cotizacionGuardada" class="guardada-container">
+      <div class="guardada-header">
+        <span class="folio-badge">{{ cotizacionGuardada.folio }}</span>
+        <span style="color:#4cd96f; font-weight:700;">Cotización guardada con éxito</span>
+      </div>
+
+      <!-- Ticket imprimible -->
+      <div class="ticket-cotizacion print-ticket-cot">
+        <div class="ticket-header">
+          <strong>{{ nombreNegocio }}</strong>
+          <p>COTIZACIÓN</p>
+          <p>Folio: <strong>{{ cotizacionGuardada.folio }}</strong></p>
+          <p>Fecha: {{ cotizacionGuardada.fecha | date:'dd/MM/yyyy' }}</p>
+          <p *ngIf="cotizacionGuardada.cliente_nombre">Cliente: {{ cotizacionGuardada.cliente_nombre }}</p>
+          <p *ngIf="cotizacionGuardada.cliente_telefono">Tel: {{ cotizacionGuardada.cliente_telefono }}</p>
+          <p>Vigencia: {{ cotizacionGuardada.vigencia_dias }} días</p>
+        </div>
+        <table class="ticket-tabla">
+          <thead><tr><th>Producto</th><th>Cant.</th><th>P.U.</th><th>Desc.</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of cotizacionGuardada.detalles">
+              <td>{{ d.nombre_producto }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td>${{ d.precio_unitario | number:'1.2-2' }}</td>
+              <td>{{ d.descuento_pct }}%</td>
+              <td>${{ d.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="ticket-total">TOTAL: ${{ cotizacionGuardada.total | number:'1.2-2' }}</div>
+        <p class="ticket-nota" *ngIf="cotizacionGuardada.notas">Nota: {{ cotizacionGuardada.notas }}</p>
+        <p class="ticket-pie">Precios sujetos a cambio sin previo aviso.</p>
+      </div>
+
+      <div class="guardada-acciones">
+        <button class="btn-imprimir" (click)="imprimir()">Imprimir cotización</button>
+        <button class="btn-nueva" (click)="nuevaCotizacion()">Nueva cotización</button>
+      </div>
+    </div>
+
+    <!-- Formulario nueva cotización -->
+    <div *ngIf="!cotizacionGuardada" class="nueva-layout">
+
+      <!-- Columna izquierda: búsqueda + carrito -->
+      <div class="col-carrito">
+        <div class="busqueda-row">
+          <input class="input-busqueda" type="text" placeholder="Buscar producto por nombre o código..."
+            [(ngModel)]="busqueda" (input)="buscarProducto()">
+        </div>
+
+        <div *ngIf="sugerencias.length > 0" class="sugerencias-lista">
+          <div class="sugerencia-item" *ngFor="let p of sugerencias" (click)="agregarProducto(p)">
+            <span class="sug-nombre">{{ p.nombre }}</span>
+            <span class="sug-precio">${{ p.precio_menudeo | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="carrito.length === 0" class="carrito-vacio">
+          El carrito está vacío. Busca un producto para comenzar.
+        </div>
+
+        <table *ngIf="carrito.length > 0" class="carrito-tabla">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>Precio</th>
+              <th>Desc.%</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of carrito; let i = index">
+              <td>{{ item.nombre_producto }}</td>
+              <td><input class="input-num" type="number" min="1" [(ngModel)]="item.cantidad" (ngModelChange)="recalcular(item)"></td>
+              <td><input class="input-num" type="number" min="0" step="0.01" [(ngModel)]="item.precio_unitario" (ngModelChange)="recalcular(item)"></td>
+              <td><input class="input-num" type="number" min="0" max="100" [(ngModel)]="item.descuento_pct" (ngModelChange)="recalcular(item)"></td>
+              <td class="subtotal-cell">${{ item.subtotal | number:'1.2-2' }}</td>
+              <td><button class="btn-eliminar-item" (click)="eliminarItem(i)">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="carrito.length > 0" class="total-row">
+          TOTAL: <strong>${{ total | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <!-- Columna derecha: datos del cliente -->
+      <div class="col-datos">
+        <h3>Datos del cliente <span class="opcional">(opcional)</span></h3>
+        <label>Nombre</label>
+        <input class="input-campo" type="text" [(ngModel)]="clienteNombre" placeholder="Nombre del cliente">
+
+        <label>Teléfono</label>
+        <input class="input-campo" type="tel" [(ngModel)]="clienteTelefono" placeholder="10 dígitos">
+
+        <label>Email</label>
+        <input class="input-campo" type="email" [(ngModel)]="clienteEmail" placeholder="correo@ejemplo.com">
+
+        <label>Vigencia (días)</label>
+        <input class="input-campo" type="number" min="1" [(ngModel)]="vigenciaDias">
+
+        <label>Notas</label>
+        <textarea class="input-campo" rows="3" [(ngModel)]="notas" placeholder="Condiciones, observaciones..."></textarea>
+
+        <button class="btn-guardar" [disabled]="guardando || carrito.length === 0" (click)="guardar()">
+          {{ guardando ? 'Guardando...' : 'Guardar cotización' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== TAB: HISTORIAL ==================== -->
+  <div *ngIf="tab === 'historial'" class="tab-content no-print">
+
+    <div *ngIf="cargandoHistorial" class="cargando-msg">Cargando historial...</div>
+    <div *ngIf="!cargandoHistorial && historial.length === 0" class="vacio-msg">No hay cotizaciones registradas aún.</div>
+
+    <table *ngIf="!cargandoHistorial && historial.length > 0" class="report-table">
+      <thead>
+        <tr>
+          <th>Folio</th>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Estado</th>
+          <th>Sucursal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of historial">
+          <td>{{ c.folio }}</td>
+          <td>{{ c.fecha | date:'dd/MM/yy' }}</td>
+          <td>{{ c.cliente_nombre || '—' }}</td>
+          <td class="money">${{ c.total | number:'1.2-2' }}</td>
+          <td>
+            <span class="badge-estado" [style.color]="colorEstado(c.estado)">
+              {{ ESTADOS[c.estado || 'BORRADOR'] }}
+            </span>
+          </td>
+          <td>{{ c.nombre_sucursal || '—' }}</td>
+          <td class="acciones-td">
+            <button class="btn-detalle" (click)="verDetalle(c)">Ver</button>
+            <select class="select-estado" [value]="c.estado" (change)="cambiarEstado(c, $any($event.target).value)">
+              <option value="BORRADOR">Borrador</option>
+              <option value="ENVIADA">Enviada</option>
+              <option value="ACEPTADA">Aceptada</option>
+              <option value="VENCIDA">Vencida</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Modal detalle -->
+    <div *ngIf="cotizacionDetalle" class="modal-overlay" (click)="cotizacionDetalle = null">
+      <div class="modal-detalle" (click)="$event.stopPropagation()">
+        <button class="modal-cerrar" (click)="cotizacionDetalle = null">✕</button>
+        <h3>{{ cotizacionDetalle.folio }} — {{ cotizacionDetalle.cliente_nombre || 'Sin nombre' }}</h3>
+        <p><strong>Fecha:</strong> {{ cotizacionDetalle.fecha | date:'dd/MM/yyyy' }} &nbsp; <strong>Vigencia:</strong> {{ cotizacionDetalle.vigencia_dias }} días</p>
+        <table class="carrito-tabla">
+          <thead><tr><th>Producto</th><th>Cant.</th><th>P.U.</th><th>Desc.</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of cotizacionDetalle.detalles">
+              <td>{{ d.nombre_producto }}</td>
+              <td>{{ d.cantidad }}</td>
+              <td>${{ d.precio_unitario | number:'1.2-2' }}</td>
+              <td>{{ d.descuento_pct }}%</td>
+              <td>${{ d.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="total-row">TOTAL: <strong>${{ cotizacionDetalle.total | number:'1.2-2' }}</strong></div>
+        <p *ngIf="cotizacionDetalle.notas" style="color:#aaa; margin-top:10px;">{{ cotizacionDetalle.notas }}</p>
+      </div>
+    </div>
+
+  </div>
+
+</div>

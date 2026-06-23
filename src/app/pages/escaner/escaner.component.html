@@ -1,0 +1,102 @@
+<div class="escaner-page">
+
+  <!-- Header -->
+  <div class="escaner-header">
+    <h1>ESCÁNER</h1>
+    <p class="estado" [class.conectado]="conectado" [class.desconectado]="!conectado">
+      {{ mensajeEstado }}
+    </p>
+  </div>
+
+  <div class="escaner-contenido">
+
+    <!-- Cámara con overlays -->
+    <div class="camara-wrapper">
+      <div id="qr-reader"></div>
+      <div class="scan-line" *ngIf="escaneando && !mostrandoExito"></div>
+      <div class="flash-detectado" *ngIf="flashActivo"></div>
+      <div class="instruccion" *ngIf="escaneando && !mostrandoExito">
+        Apunta al código de barras
+      </div>
+      <div class="overlay-exito" *ngIf="mostrandoExito">
+        <span class="exito-check">✓</span>
+        <span class="exito-codigo">{{ ultimoCodigo }}</span>
+        <span class="exito-label">Agregado a la lista</span>
+      </div>
+    </div>
+
+    <!-- Aviso HTTPS -->
+    <div class="aviso-https" *ngIf="necesitaHttps">
+      <p class="aviso-titulo">⚠️ Cámara en tiempo real requiere HTTPS</p>
+      <p class="aviso-texto">
+        <strong>Chrome Android:</strong> <code>chrome://flags</code> →
+        <em>Insecure origins treated as secure</em> →
+        agrega <code>http://{{ hostname }}:4200</code>
+      </p>
+    </div>
+
+    <!-- Error -->
+    <p class="error-msg" *ngIf="errorCamara">⚠️ {{ errorCamara }}</p>
+
+    <!-- Botones cámara -->
+    <button class="btn-activar" *ngIf="!escaneando && !necesitaHttps" (click)="iniciarCamara()">
+      📷 Activar Cámara
+    </button>
+
+    <button class="btn-detener" *ngIf="escaneando" (click)="detenerCamara()">
+      ✕ Detener Cámara
+    </button>
+
+    <!-- Fallback foto -->
+    <div *ngIf="necesitaHttps" class="foto-wrapper">
+      <label class="btn-activar">
+        📸 {{ procesandoFoto ? 'Procesando...' : 'Tomar Foto del Código' }}
+        <input type="file" accept="image/*" capture="environment"
+          (change)="onFotoCapturada($event)" style="display:none;">
+      </label>
+    </div>
+
+    <!-- COLA DE CÓDIGOS -->
+    <div class="cola-section" *ngIf="cola.length > 0 || mensajeEnvio">
+
+      <div class="cola-header">
+        <span class="cola-titulo">LISTA DE PRODUCTOS</span>
+        <span class="cola-count">{{ cola.length }} código{{ cola.length !== 1 ? 's' : '' }}</span>
+      </div>
+
+      <div class="cola-lista">
+        <div class="cola-item" *ngFor="let codigo of cola; let i = index">
+          <span class="cola-num">{{ i + 1 }}</span>
+          <span class="cola-codigo">{{ codigo }}</span>
+          <button class="cola-quitar" (click)="quitarDeCola(i)">✕</button>
+        </div>
+      </div>
+
+      <p class="mensaje-envio" *ngIf="mensajeEnvio">{{ mensajeEnvio }}</p>
+
+      <button class="btn-enviar-todo" (click)="enviarTodo()"
+        [disabled]="enviando || cola.length === 0">
+        {{ enviando ? 'Enviando...' : '📤 Enviar todo a la caja (' + cola.length + ')' }}
+      </button>
+
+    </div>
+
+    <!-- Separador -->
+    <div class="separador">
+      <div class="sep-linea"></div>
+      <span class="sep-texto">AGREGAR MANUAL</span>
+      <div class="sep-linea"></div>
+    </div>
+
+    <!-- Input manual -->
+    <div class="manual-row">
+      <input class="input-manual" type="text"
+        [(ngModel)]="codigoManual"
+        (keyup.enter)="agregarManual()"
+        placeholder="Código manual...">
+      <button class="btn-agregar" (click)="agregarManual()">+</button>
+    </div>
+
+  </div>
+
+</div>

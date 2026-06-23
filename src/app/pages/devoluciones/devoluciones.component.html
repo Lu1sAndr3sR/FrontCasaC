@@ -1,0 +1,146 @@
+<div class="dev-window">
+
+  <!-- TOP BAR -->
+  <div class="dev-topbar">
+    <button class="btn-volver" (click)="volver()">←</button>
+    <div class="dev-topbar-info">
+      <span class="dev-titulo">↩ Devoluciones</span>
+      <span class="dev-sucursal">{{ sucursalActivaService.sucursalActiva?.nombre || 'Sin sucursal' }}</span>
+    </div>
+    <div class="dev-topbar-right">
+      <img [src]="negocioService.logoActivo" class="dev-logo" alt="logo">
+      <app-topbar-perfil></app-topbar-perfil>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="dev-tabs">
+    <button [class.tab-activo]="tab === 'nueva'" (click)="cambiarTab('nueva')">Nueva Devolución</button>
+    <button [class.tab-activo]="tab === 'historial'" (click)="cambiarTab('historial')">Historial</button>
+  </div>
+
+  <!-- TAB: NUEVA DEVOLUCIÓN -->
+  <div *ngIf="tab === 'nueva'" class="dev-content">
+
+    <!-- Buscar venta por folio -->
+    <div class="buscar-card">
+      <label class="campo-label">Folio de la venta original</label>
+      <div class="buscar-row">
+        <input class="input-folio"
+               [(ngModel)]="folioBuscar"
+               placeholder="Ej. VTA-0001"
+               (keyup.enter)="buscarVenta()">
+        <button class="btn-buscar" (click)="buscarVenta()" [disabled]="buscando">
+          {{ buscando ? 'Buscando...' : 'Buscar' }}
+        </button>
+      </div>
+      <p *ngIf="errorBusqueda" class="error-texto">{{ errorBusqueda }}</p>
+    </div>
+
+    <!-- Resultado: venta encontrada -->
+    <div *ngIf="ventaEncontrada" class="venta-card">
+      <div class="venta-header">
+        <span class="venta-folio">{{ ventaEncontrada.folio }}</span>
+        <span class="venta-fecha">{{ ventaEncontrada.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="venta-total">Total original: ${{ ventaEncontrada.total | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Items de la venta -->
+      <table class="items-tabla">
+        <thead>
+          <tr>
+            <th>Devolver</th>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cant. comprada</th>
+            <th>Cant. a devolver</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items" [class.fila-activa]="item.seleccionado">
+            <td>
+              <input type="checkbox" [(ngModel)]="item.seleccionado">
+            </td>
+            <td>{{ item.nombre_producto }}</td>
+            <td>${{ item.precio_unitario | number:'1.2-2' }}</td>
+            <td>{{ item.cantidadOriginal }}</td>
+            <td>
+              <input type="number"
+                     class="input-cantidad"
+                     [(ngModel)]="item.cantidadADevolver"
+                     [min]="1"
+                     [max]="item.cantidadOriginal"
+                     [disabled]="!item.seleccionado">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Motivo -->
+      <div class="motivo-row">
+        <label class="campo-label">Motivo (opcional)</label>
+        <textarea class="input-motivo"
+                  [(ngModel)]="motivo"
+                  placeholder="Ej. Producto defectuoso, error en pedido..."
+                  rows="2"></textarea>
+      </div>
+
+      <!-- Total y botón -->
+      <div class="accion-row">
+        <div class="total-devolver" *ngIf="hayItemsSeleccionados">
+          Total a devolver: <strong>${{ totalADevolver | number:'1.2-2' }}</strong>
+        </div>
+        <button class="btn-registrar"
+                (click)="registrarDevolucion()"
+                [disabled]="!hayItemsSeleccionados || guardando">
+          {{ guardando ? 'Registrando...' : '↩ Registrar Devolución' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB: HISTORIAL -->
+  <div *ngIf="tab === 'historial'" class="dev-content">
+
+    <div *ngIf="cargandoHistorial" class="estado-texto">Cargando historial...</div>
+    <div *ngIf="!cargandoHistorial && historial.length === 0" class="estado-texto">
+      No hay devoluciones registradas.
+    </div>
+
+    <table *ngIf="!cargandoHistorial && historial.length > 0" class="historial-tabla">
+
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Folio venta</th>
+          <th>Motivo</th>
+          <th>Productos</th>
+          <th>Total devuelto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of historial">
+          <td>{{ d.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ d.folio_venta || '—' }}</td>
+          <td>{{ d.motivo || '—' }}</td>
+          <td>
+            <span *ngFor="let det of d.detalles" class="det-chip">
+              {{ det.nombre_producto }} ×{{ det.cantidad }}
+            </span>
+          </td>
+          <td class="total-cell">${{ d.total_devuelto | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <div *ngIf="!cargandoHistorial && totalPaginas > 1" class="paginacion">
+      <button class="btn-pag" (click)="irPagina(paginaActual - 1)" [disabled]="paginaActual === 1">‹ Anterior</button>
+      <span class="pag-info">Página {{ paginaActual }} de {{ totalPaginas }}</span>
+      <button class="btn-pag" (click)="irPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente ›</button>
+    </div>
+
+  </div>
+
+</div>

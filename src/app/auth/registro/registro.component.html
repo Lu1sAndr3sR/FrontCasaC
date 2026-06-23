@@ -1,0 +1,123 @@
+<div class="registro-container">
+
+  <div class="left-panel">
+    <img src="assets/logo.png" alt="SC POS">
+    <p class="tagline">Sistema POS Multi-sucursal</p>
+  </div>
+
+  <div class="right-panel">
+    <h2>CREAR CUENTA</h2>
+
+    <div class="modo-tabs">
+      <button [class.activo]="modo === 'admin'" (click)="cambiarModo('admin')">
+        🏢 Nueva empresa
+      </button>
+      <button [class.activo]="modo === 'empleado'" (click)="cambiarModo('empleado')">
+        👤 Unirme con código
+      </button>
+    </div>
+
+    <form (ngSubmit)="enviar()" #f="ngForm">
+
+      <!-- Campos comunes -->
+      <div class="campo">
+        <label>Nombre completo</label>
+        <input type="text" [(ngModel)]="form.nombre" name="nombre" required placeholder="Ej. Juan Pérez">
+      </div>
+
+      <div class="campo">
+        <label>Usuario</label>
+        <input type="text" [(ngModel)]="form.usuario" name="usuario" required
+          placeholder="Sin espacios ni acentos">
+      </div>
+
+      <div class="campo-row">
+        <div class="campo">
+          <label>Contraseña</label>
+          <input type="password" [(ngModel)]="form.contrasena" name="contrasena" required
+            placeholder="Mínimo 6 caracteres">
+        </div>
+        <div class="campo">
+          <label>Confirmar contraseña</label>
+          <input type="password" [(ngModel)]="form.confirmar" name="confirmar" required>
+          @if (form.confirmar && form.contrasena !== form.confirmar) {
+            <span class="error-hint">Las contraseñas no coinciden</span>
+          }
+        </div>
+      </div>
+
+      <!-- Campos ADMIN -->
+      @if (modo === 'admin') {
+
+        <div class="separador">Verificación de correo</div>
+
+        <div class="campo">
+          <label>Correo electrónico de la empresa</label>
+          <div class="campo-fila-email">
+            <input type="email" [(ngModel)]="form.email" name="email"
+              placeholder="contacto@miempresa.com"
+              [disabled]="codigoEnviado"
+              [class.input-ok]="codigoEnviado">
+            <button type="button" class="btn-solicitar"
+              (click)="solicitarCodigo()"
+              [disabled]="!emailValido || solicitandoCodigo || codigoEnviado">
+              {{ solicitandoCodigo ? 'Enviando...' : (codigoEnviado ? '✓ Enviado' : 'Enviar código') }}
+            </button>
+          </div>
+          @if (!codigoEnviado) {
+            <span class="hint">Te enviaremos un código de 6 dígitos para verificar tu correo.</span>
+          }
+        </div>
+
+        @if (codigoEnviado) {
+          <div class="campo">
+            <label>
+              Código de verificación
+              <span class="countdown" [class.urgente]="segundosRestantes < 60">
+                ⏱ {{ tiempoRestante }}
+              </span>
+            </label>
+            <input type="text" [(ngModel)]="form.codigo_verificacion" name="codigo_verificacion"
+              maxlength="6" placeholder="6 dígitos"
+              style="letter-spacing:6px;font-size:20px;text-align:center;font-family:monospace">
+            <span class="hint">
+              Código enviado a <strong>{{ form.email }}</strong>.
+              <button type="button" class="btn-link" (click)="codigoEnviado = false; form.codigo_verificacion = ''">
+                Cambiar correo
+              </button>
+            </span>
+          </div>
+        }
+
+      }
+
+      <!-- Campos EMPLEADO -->
+      @if (modo === 'empleado') {
+        <div class="separador">Código de tu empresa</div>
+
+        <div class="campo">
+          <label>Código de invitación</label>
+          <input type="text" [(ngModel)]="form.codigo_invitacion" name="codigo_invitacion" required
+            maxlength="12" placeholder="Ej. INV-A3F9B2" style="text-transform:uppercase;letter-spacing:2px">
+          <span class="hint">Solicítalo al administrador de tu empresa</span>
+        </div>
+      }
+
+      <label class="terminos-check">
+        <input type="checkbox" [(ngModel)]="aceptaTerminos" name="aceptaTerminos">
+        <span>He leído y acepto los
+          <a routerLink="/terminos" target="_blank">Términos y Condiciones</a>
+          y el <a routerLink="/terminos" target="_blank">Aviso de Privacidad</a>.
+        </span>
+      </label>
+
+      <button type="submit" class="btn-submit" [disabled]="!formularioValido || !aceptaTerminos || cargando">
+        {{ cargando ? 'Creando cuenta...' : (modo === 'admin' ? 'Crear empresa y cuenta' : 'Unirse a empresa') }}
+      </button>
+
+    </form>
+
+    <p class="link-login">¿Ya tienes cuenta? <a routerLink="/login">Iniciar sesión</a></p>
+  </div>
+
+</div>

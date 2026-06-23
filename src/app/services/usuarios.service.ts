@@ -1,34 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Usuario, UsuarioRaw, RespuestaSimple } from '../models/interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuariosService {
 
-  // Asegúrate que esta URL coincida con tu backend (puerto 3000)
-  private apiUrl = 'http://localhost:3000/api/usuarios';
+  private apiUrl = `${environment.apiUrl}/usuarios`;
 
   constructor(private http: HttpClient) { }
 
-  // OBTENER TODOS
-  getUsuarios(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getUsuarios(): Observable<UsuarioRaw[]> {
+    return this.http.get<UsuarioRaw[]>(this.apiUrl);
   }
 
-  // CREAR UNO NUEVO
-  createUsuario(usuario: any): Observable<any> {
-    return this.http.post(this.apiUrl, usuario);
+  createUsuario(usuario: Usuario): Observable<RespuestaSimple> {
+    return this.http.post<RespuestaSimple>(this.apiUrl, usuario);
   }
 
-  // ACTUALIZAR (EDITAR)
-  updateUsuario(id: number, usuario: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, usuario);
+  updateUsuario(id: number, usuario: Partial<Usuario>): Observable<RespuestaSimple> {
+    return this.http.put<RespuestaSimple>(`${this.apiUrl}/${id}`, usuario);
   }
 
-  // ELIMINAR
-  deleteUsuario(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  deleteUsuario(id: number): Observable<RespuestaSimple> {
+    return this.http.delete<RespuestaSimple>(`${this.apiUrl}/${id}`);
   }
 }

@@ -2,35 +2,71 @@
   <header class="top-bar">
     <div class="top-bar-inner">
       <div class="logo-wrap">
-        <img src="assets/logoC.png" class="logo" alt="logo" (click)="goBack()" style="cursor: pointer;">
+        <img [src]="negocioService.logoActivo" class="logo" alt="logo" (click)="goBack()" style="cursor: pointer;">
       </div>
       <div class="top-right">
         <h2 class="page-title">CENTRO DE NOTIFICACIONES</h2>
+        <span class="suc-badge-noti" *ngIf="sucursalNombre">🏬 {{ sucursalNombre }}</span>
+        <app-topbar-perfil></app-topbar-perfil>
       </div>
     </div>
   </header>
 
   <main class="main-bg">
     <div class="panel">
-      
+
       <div *ngIf="cargando" class="loading">Cargando alertas...</div>
 
-      <div class="noti-list" *ngIf="!cargando && notificaciones.length > 0">
-        
-        <div class="noti-card clickable" 
-             *ngFor="let noti of notificaciones"
-             (click)="irAlInventario(noti)">
-             
-          <div class="icon-area">⚠️</div>
-          <div class="text-area">
-            <h3>{{ noti.titulo }}</h3>
-            <p>{{ noti.mensaje }}</p>
-            <span class="stock-badge">{{ noti.detalle }}</span>
-          </div>
-          <div class="time-area">Ir a editar →</div>
+      <ng-container *ngIf="!cargando && notificaciones.length > 0">
+
+        <!-- Botón analizar con IA -->
+        <div class="ia-bar">
+          <button class="btn-ia" (click)="analizarConIA()" [disabled]="cargandoIA">
+            {{ cargandoIA ? '⏳ Analizando...' : '🤖 Analizar con IA' }}
+          </button>
+          <span class="ia-hint" *ngIf="!aiService.tieneApiKey()">
+            (Configura tu API key en Usuarios)
+          </span>
         </div>
 
-      </div>
+        <!-- Resultado análisis IA -->
+        <div class="ia-resultado" *ngIf="analisisIA">
+          <h4>📊 Análisis de Reabastecimiento</h4>
+          <pre class="ia-texto">{{ analisisIA }}</pre>
+        </div>
+        <div class="ia-error" *ngIf="errorIA">⚠️ {{ errorIA }}</div>
+
+        <div class="noti-list">
+          <div class="noti-card clickable"
+               *ngFor="let noti of notificaciones"
+               [class.urgencia-critica]="noti.urgencia === 'critica'"
+               [class.urgencia-alta]="noti.urgencia === 'alta'"
+               [class.urgencia-media]="noti.urgencia === 'media'"
+               (click)="irAlInventario(noti)">
+
+            <div class="icon-area">
+              {{ noti.urgencia === 'critica' ? '🔴' : noti.urgencia === 'alta' ? '🟠' : '🟡' }}
+            </div>
+
+            <div class="text-area">
+              <h3>{{ noti.titulo }}</h3>
+              <p>{{ noti.mensaje }}</p>
+              <div class="badges-row">
+                <span class="stock-badge">{{ noti.detalle }}</span>
+                <span class="dias-badge" *ngIf="noti.diasEstimados !== null">
+                  ~{{ noti.diasEstimados }} días
+                </span>
+                <span class="vel-badge" *ngIf="noti.velocidadDiaria > 0">
+                  {{ noti.velocidadDiaria | number:'1.1-1' }}/día
+                </span>
+              </div>
+            </div>
+
+            <div class="time-area">Ir a editar →</div>
+          </div>
+        </div>
+
+      </ng-container>
 
       <div class="empty-state" *ngIf="!cargando && notificaciones.length === 0">
         <div class="icon-empty">🔔</div>

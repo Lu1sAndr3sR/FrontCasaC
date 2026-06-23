@@ -1,0 +1,260 @@
+<div class="terminos-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-inner">
+      <a routerLink="/" class="back-link">← Regresar</a>
+      <div class="brand">
+        <img src="assets/logo.png" alt="SC POS" style="height:28px;object-fit:contain;">
+        <span class="brand-name">SC POS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+
+    <!-- AVISO DE PRIVACIDAD -->
+    <section class="doc-section" id="aviso-privacidad">
+      <div class="doc-tag">Documento Legal</div>
+      <h1>Aviso de Privacidad</h1>
+      <p class="meta">Última actualización: {{ fechaActualizacion }}</p>
+
+      <p>
+        De conformidad con lo establecido en la <strong>Ley Federal de Protección de Datos Personales
+        en Posesión de los Particulares (LFPDPPP)</strong> y su Reglamento, <strong>SC POS</strong>
+        (en lo sucesivo "SC POS") pone a su disposición el presente Aviso de Privacidad.
+      </p>
+
+      <h2>1. Responsable del tratamiento</h2>
+      <p>
+        SC POS es el responsable del tratamiento de sus datos personales. Para ejercer sus derechos
+        o presentar alguna solicitud, puede contactarnos a través del correo electrónico indicado en
+        la plataforma o mediante el distribuidor autorizado que le proporcionó acceso al sistema.
+      </p>
+
+      <h2>2. Datos personales que recabamos</h2>
+      <p>Recabamos las siguientes categorías de datos personales:</p>
+      <ul>
+        <li><strong>De identificación:</strong> nombre completo, nombre de usuario.</li>
+        <li><strong>De contacto:</strong> dirección de correo electrónico.</li>
+        <li><strong>Fiscales:</strong> RFC, razón social, régimen fiscal, código postal fiscal (solo si utiliza el módulo de facturación CFDI).</li>
+        <li><strong>Operativos del negocio:</strong> datos de ventas, inventario, clientes fiscales y movimientos de caja, los cuales son proporcionados directamente por el titular de la cuenta para el funcionamiento del sistema.</li>
+      </ul>
+      <p>No recabamos datos personales sensibles (salud, biométricos, origen racial, etc.).</p>
+
+      <h2>3. Finalidades del tratamiento</h2>
+      <p>Sus datos personales son utilizados para las siguientes finalidades <strong>primarias</strong> (necesarias para la relación contractual):</p>
+      <ul>
+        <li>Crear y gestionar su cuenta de acceso al sistema.</li>
+        <li>Verificar su identidad y autenticar su sesión de forma segura.</li>
+        <li>Prestar los servicios contratados: punto de venta, inventario, reportes y facturación electrónica.</li>
+        <li>Envío de comunicaciones transaccionales (confirmación de cuenta, restablecimiento de contraseña).</li>
+        <li>Cumplimiento de obligaciones legales y fiscales aplicables.</li>
+      </ul>
+      <p>Finalidades <strong>secundarias</strong> (puede oponerse a estas):</p>
+      <ul>
+        <li>Envío de actualizaciones y nuevas funcionalidades de la plataforma.</li>
+      </ul>
+      <p>
+        Si desea que sus datos no sean tratados para finalidades secundarias, puede manifestarlo
+        enviando un correo con el asunto "Oposición finalidades secundarias" a través del distribuidor
+        que le proporcionó el servicio.
+      </p>
+
+      <h2>4. Transferencia de datos personales</h2>
+      <p>
+        SC POS no vende, cede ni transfiere sus datos personales a terceros sin su consentimiento, salvo
+        en los casos previstos en el artículo 37 de la LFPDPPP, en particular:
+      </p>
+      <ul>
+        <li>Cuando sea requerido por autoridad competente (SAT, autoridades fiscales).</li>
+        <li>A proveedores de servicios de infraestructura (hosting, correo electrónico) que actúan como
+          encargados del tratamiento bajo acuerdos de confidencialidad.</li>
+        <li>Al Proveedor Autorizado de Certificación (PAC) para el timbrado de CFDIs, exclusivamente los
+          datos fiscales requeridos por el SAT.</li>
+      </ul>
+
+      <h2>5. Derechos ARCO</h2>
+      <p>
+        Usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al tratamiento
+        de sus datos personales (Derechos ARCO). Para ejercerlos, presente su solicitud por escrito
+        a través del distribuidor autorizado que le proporcionó acceso al sistema, incluyendo:
+      </p>
+      <ul>
+        <li>Nombre completo y correo electrónico de la cuenta.</li>
+        <li>Descripción del derecho que desea ejercer y los datos sobre los que solicita la acción.</li>
+        <li>Copia de identificación oficial.</li>
+      </ul>
+      <p>
+        Responderemos su solicitud en un plazo máximo de <strong>20 días hábiles</strong> a partir de su recepción.
+      </p>
+
+      <h2>6. Seguridad de los datos</h2>
+      <p>
+        SC POS implementa medidas técnicas, administrativas y físicas de seguridad para proteger sus datos,
+        incluyendo: cifrado de contraseñas con algoritmos de hash seguros (bcrypt), autenticación mediante
+        tokens JWT, comunicaciones protegidas por HTTPS y acceso controlado por roles. A pesar de lo anterior,
+        ningún sistema es infalible y no podemos garantizar la seguridad absoluta de la información.
+      </p>
+
+      <h2>7. Uso de cookies y tecnologías similares</h2>
+      <p>
+        El sistema utiliza almacenamiento local del navegador (localStorage) para mantener su sesión activa
+        y guardar preferencias básicas de la interfaz. No utilizamos cookies de seguimiento de terceros ni
+        tecnologías de publicidad.
+      </p>
+
+      <h2>8. Cambios al aviso de privacidad</h2>
+      <p>
+        Cualquier cambio al presente Aviso de Privacidad será comunicado a través de la plataforma o
+        por correo electrónico registrado, con al menos 30 días de anticipación a su entrada en vigor.
+        El aviso vigente siempre estará disponible en esta página.
+      </p>
+    </section>
+
+    <div class="doc-divider"></div>
+
+    <!-- TÉRMINOS Y CONDICIONES -->
+    <section class="doc-section" id="terminos">
+      <div class="doc-tag">Documento Legal</div>
+      <h1>Términos y Condiciones de Uso</h1>
+      <p class="meta">Última actualización: {{ fechaActualizacion }}</p>
+
+      <p>
+        Los presentes Términos y Condiciones (en lo sucesivo "Términos") regulan el acceso y uso del
+        sistema de punto de venta <strong>SC POS</strong> (en lo sucesivo "el Sistema" o "la Plataforma").
+        Al registrarse o utilizar el Sistema, usted acepta quedar obligado por estos Términos. Si no está
+        de acuerdo, no utilice el Sistema.
+      </p>
+
+      <h2>1. Definiciones</h2>
+      <ul>
+        <li><strong>SC POS / Plataforma:</strong> El sistema de software como servicio (SaaS) de punto de venta, inventario, reportes y facturación electrónica.</li>
+        <li><strong>Distribuidor:</strong> La persona física o moral autorizada por SC POS para comercializar y dar soporte al Sistema.</li>
+        <li><strong>Cliente / Empresa:</strong> La persona física o moral que contrata el servicio a través de un Distribuidor.</li>
+        <li><strong>Usuario:</strong> Cualquier persona que accede al Sistema con credenciales asignadas por el Cliente.</li>
+        <li><strong>Superadministrador:</strong> SC POS o el Distribuidor, con acceso al panel de administración global del Sistema.</li>
+      </ul>
+
+      <h2>2. Registro y cuenta</h2>
+      <p>
+        Para acceder al Sistema, el Cliente debe registrar una cuenta proporcionando información veraz,
+        completa y actualizada. El Cliente es responsable de mantener la confidencialidad de sus
+        credenciales y de todas las actividades realizadas bajo su cuenta.
+      </p>
+      <p>
+        El acceso está sujeto a aprobación por parte del Distribuidor o del Superadministrador. SC POS
+        se reserva el derecho de rechazar o suspender cuentas que incumplan estos Términos.
+      </p>
+
+      <h2>3. Licencia de uso</h2>
+      <p>
+        SC POS otorga al Cliente una licencia de uso no exclusiva, no transferible e intransferible para
+        acceder y utilizar el Sistema exclusivamente para la gestión de su(s) negocio(s) de ferretería o
+        comercio similar, durante la vigencia del contrato con el Distribuidor.
+      </p>
+      <p>
+        Queda estrictamente prohibido: (a) copiar, modificar o descompilar el Sistema; (b) revender o
+        sublicenciar el acceso sin autorización escrita; (c) usar el Sistema para fines ilícitos o que
+        infrinjan derechos de terceros.
+      </p>
+
+      <h2>4. Datos del cliente y privacidad</h2>
+      <p>
+        Los datos operativos ingresados en el Sistema (productos, ventas, clientes, etc.) son propiedad
+        exclusiva del Cliente. SC POS únicamente los procesa para prestar el servicio contratado, conforme
+        al Aviso de Privacidad que forma parte integral de estos Términos.
+      </p>
+      <p>
+        El Cliente es el único responsable de la veracidad, legalidad y exactitud de los datos que ingresa
+        al Sistema, incluyendo los datos fiscales utilizados para la emisión de comprobantes electrónicos.
+      </p>
+
+      <h2>5. Facturación electrónica (CFDI)</h2>
+      <p>
+        El módulo de facturación permite al Cliente generar Comprobantes Fiscales Digitales por Internet (CFDI)
+        conforme a las disposiciones del Servicio de Administración Tributaria (SAT). El Cliente es el único
+        responsable de la correcta configuración de sus datos fiscales, del uso de sus sellos digitales (CSD)
+        y del cumplimiento de sus obligaciones fiscales ante el SAT.
+      </p>
+      <p>
+        SC POS no actúa como Proveedor Autorizado de Certificación (PAC) ni garantiza la validez fiscal de
+        los comprobantes emitidos cuando el Cliente no ha configurado correctamente su CSD y PAC autorizado.
+      </p>
+
+      <h2>6. Disponibilidad del servicio</h2>
+      <p>
+        SC POS realizará sus mejores esfuerzos para mantener el Sistema disponible de forma continua.
+        Sin embargo, no garantiza disponibilidad ininterrumpida y se reserva el derecho de realizar
+        interrupciones por mantenimiento, actualizaciones o causas de fuerza mayor. No seremos responsables
+        por daños derivados de interrupciones del servicio fuera de nuestro control razonable.
+      </p>
+
+      <h2>7. Suspensión y terminación</h2>
+      <p>
+        SC POS o el Distribuidor podrán suspender o terminar el acceso al Sistema en cualquiera de los
+        siguientes casos:
+      </p>
+      <ul>
+        <li>Incumplimiento de estos Términos.</li>
+        <li>Falta de pago del servicio conforme a lo acordado con el Distribuidor.</li>
+        <li>Uso del Sistema para actividades fraudulentas, ilegales o que perjudiquen a terceros.</li>
+        <li>Cuando así lo requiera una autoridad competente.</li>
+      </ul>
+      <p>
+        En caso de terminación, el Cliente podrá solicitar una exportación de sus datos operativos dentro
+        de los 30 días posteriores al cierre de su cuenta.
+      </p>
+
+      <h2>8. Limitación de responsabilidad</h2>
+      <p>
+        En la máxima medida permitida por la ley, SC POS no será responsable por:
+      </p>
+      <ul>
+        <li>Pérdida de datos derivada de mal uso del Sistema por parte del Cliente o sus usuarios.</li>
+        <li>Daños indirectos, incidentales, lucro cesante o pérdida de oportunidades de negocio.</li>
+        <li>Errores en la información fiscal ingresada por el Cliente y sus consecuencias ante el SAT.</li>
+        <li>Daños causados por interrupciones del servicio atribuibles a terceros (proveedor de internet,
+          SAT, PAC, servicios de nube).</li>
+      </ul>
+      <p>
+        La responsabilidad total de SC POS ante el Cliente, por cualquier causa, no excederá el monto
+        pagado por el servicio en los tres (3) meses anteriores al evento que origina la reclamación.
+      </p>
+
+      <h2>9. Propiedad intelectual</h2>
+      <p>
+        Todos los derechos de propiedad intelectual sobre el Sistema, incluyendo su código fuente,
+        diseño, marcas y documentación, son y permanecerán como propiedad exclusiva de SC POS.
+        El uso del Sistema no otorga al Cliente ningún derecho de propiedad intelectual.
+      </p>
+
+      <h2>10. Modificaciones a los Términos</h2>
+      <p>
+        SC POS se reserva el derecho de modificar estos Términos en cualquier momento. Los cambios
+        sustanciales serán notificados con al menos 30 días de anticipación a través de la plataforma
+        o por correo electrónico. El uso continuado del Sistema tras la vigencia de los nuevos Términos
+        implica su aceptación.
+      </p>
+
+      <h2>11. Legislación aplicable y jurisdicción</h2>
+      <p>
+        Estos Términos se rigen por las leyes de los <strong>Estados Unidos Mexicanos</strong>. Para
+        cualquier controversia derivada de su interpretación o cumplimiento, las partes se someten a la
+        jurisdicción de los tribunales competentes de la Ciudad de México, renunciando expresamente a
+        cualquier otro fuero que pudiera corresponderles en razón de sus domicilios presentes o futuros.
+      </p>
+
+      <h2>12. Aceptación</h2>
+      <p>
+        Al crear una cuenta o usar el Sistema, el Cliente declara haber leído, comprendido y aceptado
+        íntegramente el presente Aviso de Privacidad y los Términos y Condiciones de Uso.
+      </p>
+    </section>
+
+    <!-- FOOTER DEL DOC -->
+    <div class="doc-footer">
+      <a routerLink="/" class="btn-home">← Regresar al inicio</a>
+      <a routerLink="/registro" class="btn-registro">Registrar mi ferretería →</a>
+    </div>
+  </div>
+</div>

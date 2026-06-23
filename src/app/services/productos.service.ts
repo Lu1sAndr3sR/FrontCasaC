@@ -1,73 +1,82 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs'; // 1. Importar Subject
+import { Observable, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Producto, MovimientoInventario, RespuestaSimple, RespuestaEliminar } from '../models/interfaces';
 
-export interface Producto {
-  producto_id: number;
-  codigo_barras: string;
-  nombre: string;
-  descripcion: string;
-  categoria: string;
-  precio_menudeo: number;
-  precio_mayoreo: number;
-  precio_oferta: number;
-  stock_actual: number;
-  stock_minimo: number;
-  activo: boolean;
+export interface ProductosPaginados {
+  items:  Producto[];
+  total:  number;
+  page:   number;
+  pages:  number;
+  limit:  number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProductosService {
 
-  private api = 'http://localhost:3000/api/productos';
+  private api = `${environment.apiUrl}/productos`;
 
-  // 2. Canal de comunicación para alertas
   private alertaStockSource = new Subject<string>();
   alertaStock$ = this.alertaStockSource.asObservable();
 
   constructor(private http: HttpClient) {}
 
-  // --- NUEVA FUNCIÓN: Verificar y Avisar ---
   verificarStockBajo() {
-    this.getProductos().subscribe({
-      next: (productos) => {
-        // Filtramos productos con stock <= 5
-        const bajos = productos.filter(p => p.stock_actual <= 5);
-        
-        if (bajos.length > 0) {
-          // Emitimos el aviso para quien esté escuchando (AppComponent)
-          this.alertaStockSource.next(`⚠️ Atención: Tienes ${bajos.length} productos con stock crítico.`);
-        }
+    this.http.get<{ count: number }>(`${this.api}/stock-bajo-count`).subscribe({
+      next: ({ count }) => {
+        if (count > 0) this.alertaStockSource.next(`⚠️ Atención: Tienes ${count} productos con stock crítico.`);
       },
-      error: (err) => console.error("Error validando stock", err)
+      error: () => {}
     });
   }
 
-  // --- TUS MÉTODOS ORIGINALES ---
-
-  buscarProducto(busqueda: string): Observable<any> {
-    return this.http.get(`${this.api}/buscar/${busqueda}`);
+  buscarProducto(busqueda: string, sucursalId?: number): Observable<Producto[]> {
+    const params = sucursalId ? `?sucursal_id=${sucursalId}` : '';
+    return this.http.get<Producto[]>(`${this.api}/buscar/${busqueda}${params}`);
   }
 
-  getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(this.api);
+  getProductosPaginados(params: {
+    page?: number; limit?: number; q?: string; categoria?: string; sucursal_id?: number;
+  }): Observable<ProductosPaginados> {
+    const p: Record<string, string> = {};
+    if (params.page)        p['page']        = String(params.page);
+    if (params.limit)       p['limit']       = String(params.limit);
+    if (params.q)           p['q']           = params.q;
+    if (params.categoria)   p['categoria']   = params.categoria;
+    if (params.sucursal_id) p['sucursal_id'] = String(params.sucursal_id);
+    return this.http.get<ProductosPaginados>(this.api, { params: p });
   }
 
-  createProducto(producto: any): Observable<any> {
-    return this.http.post(this.api, producto);
+  // Mantener compatibilidad con caja y otros módulos que esperan array
+  getProductos(sucursalId?: number): Observable<Producto[]> {
+    return new Observable(obs => {
+      this.getProductosPaginados({ sucursal_id: sucursalId, limit: 200 }).subscribe({
+        next: r => { obs.next(r.items); obs.complete(); },
+        error: e => obs.error(e),
+      });
+    });
   }
 
-  updateProducto(id: number, producto: any): Observable<any> {
-    return this.http.put(`${this.api}/${id}`, producto);
+  createProducto(producto: Partial<Producto>): Observable<RespuestaSimple> {
+    return this.http.post<RespuestaSimple>(this.api, producto);
   }
 
-  deleteProducto(id: number): Observable<any> {
-    return this.http.delete(`${this.api}/${id}`);
+  updateProducto(id: number, producto: Partial<Producto>): Observable<RespuestaSimple> {
+    return this.http.put<RespuestaSimple>(`${this.api}/${id}`, producto);
   }
- registrarMovimiento(datos: any): Observable<any> {
-    // datos: { producto_id, usuario_id, tipo_movimiento, cantidad, observaciones }
-    return this.http.post(`${this.api.replace('/productos', '')}/inventario/movimiento`, datos);
-}
+
+  deleteProducto(id: number): Observable<RespuestaEliminar> {
+    return this.http.delete<RespuestaEliminar>(`${this.api}/${id}`);
+  }
+
+  registrarMovimiento(datos: MovimientoInventario): Observable<RespuestaSimple> {
+    return this.http.post<RespuestaSimple>(`${environment.apiUrl}/inventario/movimiento`, datos);
+  }
+
+  importarExcel(archivo: File): Observable<{ mensaje: string; importados: number; omitidos: number; errores: string[]; total_filas: number }> {
+    const form = new FormData();
+    form.append('archivo', archivo);
+    return this.http.post<any>(`${this.api}/importar`, form);
+  }
 }

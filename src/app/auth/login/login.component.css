@@ -5,7 +5,7 @@
 }
 
 .left-panel {
-  background: #212529; /* Azul muy oscuro */
+  background: var(--topbar);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -20,8 +20,10 @@
 }
 
 .logo-box img {
-  max-width: 80%;   /* logo un poco más grande */
-  height: auto;     /* mantiene proporción */
+  max-width: 40%;
+  max-height: 160px;
+  height: auto;
+  object-fit: contain;
 }
 
 .right-panel {
@@ -72,8 +74,8 @@ mat-form-field.full-width input.mat-input-element {
 }
 
 .login-btn {
-  background-color: #212529;  /* fondo negro */
-  color: #f5f5f5;             /* texto blanco */
+  background-color: var(--topbar);
+  color: #f5f5f5;
   height: 50px;               /* altura del botón */
   font-size: 20px;            /* tamaño del texto */
   border-radius: 8px;         /* bordes redondeados */
@@ -85,9 +87,24 @@ mat-form-field.full-width input.mat-input-element {
 }
 
 .login-btn:hover {
-  background-color: #108767; /* color de fondo al pasar el mouse */
-  color: #000000;            /* color del texto al hover */
+  background-color: var(--primario-dark);
+  color: #000000;
 }
+
+.link-registro {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #777;
+}
+
+.link-registro a {
+  color: var(--topbar);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.link-registro a:hover { text-decoration: underline; }
 
 
 

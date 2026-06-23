@@ -1,18 +1,19 @@
-<div class="window">
+﻿<div class="window">
 
-  <div class="topbar">
-    <img src="assets/logoC.png" class="logo" (click)="goDashboard()">
+  <div class="topbar no-print">
+    <img [src]="negocioService.logoActivo" class="logo" (click)="goDashboard()">
     <div class="topbar-links">
       <button (click)="goCaja()">Caja</button>
       <button (click)="goUsuarios()">Usuarios</button>
       <button (click)="goInventario()">Inventario</button>
       <button (click)="goNotificaciones()">Notificaciones</button>
     </div>
+    <app-topbar-perfil></app-topbar-perfil>
   </div>
 
   <div class="reportes-container">
 
-    <div class="reportes-header">
+    <div class="reportes-header no-print">
       <h2>Reportes y Estadísticas</h2>
 
       <div class="filtros-fecha">
@@ -21,14 +22,18 @@
         <label>Al:</label>
         <input type="date" [(ngModel)]="fechaFin" (change)="cargarDatos()">
       </div>
+
     </div>
 
-    <div class="tabs-container">
+    <div class="tabs-container no-print">
       <button class="tab-btn" [class.active]="tabActiva === 'ventas'" (click)="cambiarTab('ventas')">💰 Ventas</button>
-      <button class="tab-btn" [class.active]="tabActiva === 'productos'" (click)="cambiarTab('productos')">📦 Ranking</button>
+      <button class="tab-btn" [class.active]="tabActiva === 'movimientos'" (click)="cambiarTab('movimientos')">📦 Productos</button>
       <button class="tab-btn" [class.active]="tabActiva === 'caja'" (click)="cambiarTab('caja')">👮 Auditoría</button>
 
       <button class="tab-btn" [class.active]="tabActiva === 'graficas'" (click)="cambiarTab('graficas')">📊 Gráficas</button>
+      <button class="tab-btn" [class.active]="tabActiva === 'facturas'" (click)="cambiarTab('facturas')">🧾 Facturas</button>
+      <button class="tab-btn" [class.active]="tabActiva === 'compras'" (click)="cambiarTab('compras')">🛒 Compras</button>
+      <button class="tab-btn tab-ia" [class.active]="tabActiva === 'ia'" (click)="cambiarTab('ia')">🤖 IA</button>
     </div>
 
     <div class="tab-content">
@@ -51,45 +56,34 @@
               <th>Folio</th>
               <th>Hora</th>
               <th>Cajero</th>
+              <th>Sucursal</th>
               <th>Tipo</th>
               <th>Total</th>
+              <th class="no-print"></th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let v of listaVentas">
-              <td>#{{ v.folio }}</td>
+              <td>{{ v.folio }}</td>
               <td>{{ v.fecha | date:'shortTime' }}</td>
-              <td>{{ v.nombre_cajero }}</td>
+              <td>{{ v.nombre_cajero || '—' }}</td>
+              <td><span class="badge-sucursal">{{ v.nombre_sucursal || '—' }}</span></td>
               <td>{{ v.tipo_venta }}</td>
               <td class="money">${{ v.total | number:'1.2-2' }}</td>
+              <td class="no-print">
+                <button class="btn-ver-nota" (click)="verNota(v)" [disabled]="cargandoNota">
+                  {{ cargandoNota ? '...' : '📄' }}
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
+        <div class="export-row no-print">
+          <button class="btn-export" (click)="exportarExcel('ventas')">⬇ Excel</button>
+          <button class="btn-export btn-pdf" (click)="exportarPDF('ventas')">⬇ PDF</button>
+        </div>
       </div>
 
-      <div *ngIf="tabActiva === 'productos'">
-        <h3 class="subtitulo">Productos Más Vendidos</h3>
-        <table class="report-table">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Producto</th>
-              <th>Stock Actual</th>
-              <th>Cant. Vendida</th>
-              <th>$$ Generado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of listaProductos">
-              <td>{{ p.codigo_barras }}</td>
-              <td>{{ p.nombre_producto }}</td>
-              <td>{{ p.stock_actual }}</td>
-              <td style="color: #4cc9f0; font-weight: bold;">{{ p.cantidad_vendida }}</td>
-              <td class="money">${{ p.dinero_generado | number:'1.2-2' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
 
       <div *ngIf="tabActiva === 'caja'">
         <h3 class="subtitulo">Cortes de Caja</h3>
@@ -97,6 +91,7 @@
           <thead>
             <tr>
               <th>Fecha</th>
+              <th>Sucursal</th>
               <th>Abrió</th>
               <th>Cerró</th>
               <th>Inicial</th>
@@ -107,12 +102,13 @@
           <tbody>
             <tr *ngFor="let c of listaCortes">
               <td>{{ c.fecha_apertura | date:'dd/MM HH:mm' }}</td>
+              <td><span class="badge-sucursal">{{ c.nombre_sucursal || '—' }}</span></td>
               <td>{{ c.abrio }}</td>
               <td>{{ c.cerro || '---' }}</td>
               <td>${{ c.monto_inicial }}</td>
               <td>${{ c.monto_final || 0 }}</td>
-              <td [style.color]="c.diferencia_calculada < 0 ? '#ff5f5f' : '#4cd96f'">
-                {{ c.diferencia_calculada | currency }}
+              <td [style.color]="(c.diferencia ?? 0) < 0 ? '#ff5f5f' : '#4cd96f'">
+                {{ c.diferencia | currency }}
               </td>
             </tr>
           </tbody>
@@ -123,6 +119,7 @@
           <thead>
             <tr>
               <th>Hora</th>
+              <th>Sucursal</th>
               <th>Usuario</th>
               <th>Tipo</th>
               <th>Monto</th>
@@ -132,6 +129,7 @@
           <tbody>
             <tr *ngFor="let m of listaMovimientosCaja">
               <td>{{ m.fecha | date:'shortTime' }}</td>
+              <td><span class="badge-sucursal">{{ m.nombre_sucursal || '—' }}</span></td>
               <td>{{ m.usuario }}</td>
               <td>{{ m.tipo_movimiento }}</td>
               <td class="money">${{ m.monto }}</td>
@@ -139,37 +137,87 @@
             </tr>
           </tbody>
         </table>
+        <div class="export-row no-print">
+          <button class="btn-export" (click)="exportarExcel('caja')">⬇ Excel</button>
+          <button class="btn-export btn-pdf" (click)="exportarPDF('caja')">⬇ PDF</button>
+        </div>
       </div>
 
       <div *ngIf="tabActiva === 'movimientos'">
-        <h3 class="subtitulo">Entradas y Salidas de Mercancía</h3>
+        <h3 class="subtitulo">Movimientos de Productos</h3>
         <table class="report-table">
           <thead>
             <tr>
               <th>Fecha</th>
               <th>Producto</th>
-              <th>Movimiento</th>
+              <th>Código</th>
+              <th>Sucursal</th>
+              <th>Tipo</th>
               <th>Cantidad</th>
               <th>Usuario</th>
-              <th>Motivo</th>
+              <th>Observaciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let m of listaBitacoraInv">
               <td>{{ m.fecha | date:'dd/MM HH:mm' }}</td>
-              <td>{{ m.nombre_producto }}</td>
+              <td>{{ m.producto }}</td>
+              <td>{{ m.codigo_barras || '—' }}</td>
+              <td><span class="badge-sucursal">{{ m.nombre_sucursal || '—' }}</span></td>
               <td>
-                <span [style.color]="m.tipo_movimiento === 'ENTRADA' ? '#4cd96f' : '#ff5f5f'">
-                  {{ m.tipo_movimiento }}
+                <span [style.color]="m.tipo === 'ENTRADA' ? '#4cd96f' : (m.tipo === 'PERDIDA' ? '#ff5f5f' : '#f4a261')">
+                  {{ m.tipo === 'ENTRADA' ? 'Recibida' : (m.tipo === 'PERDIDA' ? 'Pérdida' : 'Salida') }}
                 </span>
               </td>
               <td style="font-size:16px;">{{ m.cantidad }}</td>
-              <td>{{ m.nombre_usuario }}</td>
-              <td style="color:#aaa; font-style:italic;">{{ m.observaciones }}</td>
+              <td>{{ m.usuario || '—' }}</td>
+              <td style="color:#aaa; font-style:italic;">{{ m.observaciones || '—' }}</td>
             </tr>
           </tbody>
         </table>
+        <div class="export-row no-print">
+          <button class="btn-export" (click)="exportarExcel('inventario')">⬇ Excel</button>
+          <button class="btn-export btn-pdf" (click)="exportarPDF('inventario')">⬇ PDF</button>
+        </div>
       </div>
+
+      <!-- TAB COMPRAS -->
+      <div *ngIf="tabActiva === 'compras'">
+        <div class="cards-grid">
+          <div class="card">
+            <h3>Total Compras</h3>
+            <p class="cantidad" style="color:#4cc9f0;">${{ totalCompras | number:'1.2-2' }}</p>
+          </div>
+          <div class="card">
+            <h3>Entradas registradas</h3>
+            <p class="cantidad">{{ listaCompras.length }}</p>
+          </div>
+        </div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Folio</th>
+              <th>Proveedor</th>
+              <th>Productos</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of listaCompras">
+              <td>{{ c.fecha | date:'dd/MM/yy HH:mm' }}</td>
+              <td>{{ c.folio || '—' }}</td>
+              <td>{{ c.proveedor_nombre || '—' }}</td>
+              <td>{{ c.detalles?.length || 0 }} artículo(s)</td>
+              <td class="money">${{ c.total | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="listaCompras.length === 0 && !cargando" class="vacio-msg">
+          Sin compras en el período seleccionado
+        </div>
+      </div>
+
 
       <div *ngIf="tabActiva === 'graficas'">
         <div class="graficas-grid">
@@ -191,6 +239,344 @@
         </div>
       </div>
 
+      <!-- TAB FACTURAS CFDI -->
+      <div *ngIf="tabActiva === 'facturas'">
+
+        <div class="cards-grid">
+          <div class="card">
+            <h3>Total Facturas</h3>
+            <p class="cantidad" style="color: #4cc9f0;">{{ listaCfdis.length }}</p>
+          </div>
+          <div class="card">
+            <h3>Pendientes de Timbrar</h3>
+            <p class="cantidad" style="color: #f4a261;">{{ cfdisPendientes }}</p>
+          </div>
+          <div class="card">
+            <h3>Timbradas</h3>
+            <p class="cantidad" style="color: #4cd96f;">{{ cfdisTimbrados }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="cargando" style="text-align:center; padding: 40px; color: #aaa;">Cargando facturas...</div>
+
+        <div *ngIf="!cargando && listaCfdis.length === 0" style="text-align:center; padding: 40px; color: #666;">
+          No hay facturas en este período.
+        </div>
+
+        <table class="report-table" *ngIf="!cargando && listaCfdis.length > 0">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Fecha</th>
+              <th>RFC Receptor</th>
+              <th>Nombre / Razón Social</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>UUID</th>
+              <th class="no-print">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of listaCfdis">
+              <td>{{ c.folio_venta }}</td>
+              <td>{{ c.fecha_venta | date:'dd/MM/yy HH:mm' }}</td>
+              <td style="font-family: monospace; font-size: 13px;">{{ c.receptor_rfc }}</td>
+              <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" [title]="c.receptor_nombre">
+                {{ c.receptor_nombre }}
+              </td>
+              <td class="money">${{ c.total_venta | number:'1.2-2' }}</td>
+              <td>
+                <span class="cfdi-badge" [class.badge-pendiente]="c.estado === 'PENDIENTE'"
+                                         [class.badge-timbrado]="c.estado === 'TIMBRADO'"
+                                         [class.badge-cancelado]="c.estado === 'CANCELADO'">
+                  {{ c.estado }}
+                </span>
+              </td>
+              <td style="font-family: monospace; font-size: 11px; color: #aaa;">
+                {{ c.cfdi_uuid ? c.cfdi_uuid.substring(0, 8) + '...' : '—' }}
+              </td>
+              <td class="no-print">
+                <div class="cfdi-acciones">
+                  <!-- PENDIENTE: solo timbrar -->
+                  <button *ngIf="c.estado === 'PENDIENTE'"
+                          class="btn-cfdi btn-timbrar"
+                          (click)="abrirModalTimbrar(c)"
+                          [disabled]="procesandoCfdiId === c.cfdi_id">
+                    {{ procesandoCfdiId === c.cfdi_id ? '...' : 'Timbrar' }}
+                  </button>
+
+                  <!-- TIMBRADO: xml, pdf opcional, correo, cancelar -->
+                  <ng-container *ngIf="c.estado === 'TIMBRADO'">
+                    <button class="btn-cfdi btn-xml"
+                            (click)="descargarXml(c)"
+                            [disabled]="procesandoCfdiId === c.cfdi_id">
+                      XML
+                    </button>
+                    <button *ngIf="c.pdf_url" class="btn-cfdi btn-pdf" (click)="abrirPdf(c)">PDF</button>
+                    <button class="btn-cfdi btn-email"
+                            (click)="abrirModalEmail(c)"
+                            [disabled]="procesandoCfdiId === c.cfdi_id"
+                            title="Enviar por correo">
+                      📧
+                    </button>
+                    <button class="btn-cfdi btn-cancelar-cfdi"
+                            (click)="abrirModalCancelar(c)"
+                            [disabled]="procesandoCfdiId === c.cfdi_id">
+                      Cancelar
+                    </button>
+                  </ng-container>
+
+                  <!-- CANCELADO: solo xml si existe -->
+                  <button *ngIf="c.estado === 'CANCELADO' && c.xml_cfdi"
+                          class="btn-cfdi btn-xml"
+                          (click)="descargarXml(c)">
+                    XML
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB IA -->
+      <div *ngIf="tabActiva === 'ia'" class="ia-tab-content">
+
+        <div *ngIf="!aiService.tieneApiKey()" class="ia-no-key">
+          <p>⚙️ No tienes configurada una API key de IA.</p>
+          <p>Ve a <strong>Usuarios &gt; Configuración IA</strong> para configurarla.</p>
+        </div>
+
+        <div class="ia-seccion" *ngIf="aiService.tieneApiKey()">
+          <div class="ia-card">
+            <h3>📊 Análisis Inteligente del Período</h3>
+            <p class="ia-desc">Genera un resumen ejecutivo con los datos cargados del período seleccionado.</p>
+            <button class="btn-ia-accion" (click)="analizarConIA()" [disabled]="cargandoIA">
+              {{ cargandoIA ? '⏳ Analizando...' : '🤖 Analizar período' }}
+            </button>
+            <div class="ia-resultado" *ngIf="analisisIA">
+              <pre class="ia-texto">{{ analisisIA }}</pre>
+            </div>
+            <div class="ia-error" *ngIf="errorIA">⚠️ {{ errorIA }}</div>
+          </div>
+
+          <div class="ia-card">
+            <h3>🔍 Detectar Anomalías</h3>
+            <p class="ia-desc">Analiza ventas y cortes de caja en busca de patrones inusuales o irregularidades.</p>
+            <button class="btn-ia-accion btn-anomalias" (click)="detectarAnomalias()" [disabled]="cargandoAnomalias">
+              {{ cargandoAnomalias ? '⏳ Analizando...' : '🔍 Detectar anomalías' }}
+            </button>
+            <div class="ia-resultado" *ngIf="analisisAnomalias">
+              <pre class="ia-texto">{{ analisisAnomalias }}</pre>
+            </div>
+            <div class="ia-error" *ngIf="errorAnomalias">⚠️ {{ errorAnomalias }}</div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
+  </div>
+</div>
+
+<!-- MODAL CANCELAR CFDI -->
+<div class="modal-overlay-cfdi no-print" *ngIf="modalCancelar">
+  <div class="modal-cfdi">
+    <h3 class="modal-cfdi-titulo">Cancelar CFDI</h3>
+
+    <div class="modal-cfdi-info">
+      <div><span>Folio:</span> <strong>{{ cfdiACancelar?.folio_venta }}</strong></div>
+      <div><span>RFC:</span> {{ cfdiACancelar?.receptor_rfc }}</div>
+      <div style="font-size: 12px; color: #aaa; word-break: break-all;">
+        <span>UUID:</span> {{ cfdiACancelar?.cfdi_uuid || '—' }}
+      </div>
+    </div>
+
+    <div class="modal-cfdi-field">
+      <label>Motivo de cancelación (SAT)</label>
+      <select [(ngModel)]="motivoCancelacion">
+        <option value="">— Selecciona el motivo —</option>
+        <option value="01">01 — Comprobante emitido con errores con relación</option>
+        <option value="02">02 — Comprobante emitido con errores sin relación</option>
+        <option value="03">03 — No se llevó a cabo la operación</option>
+        <option value="04">04 — Operación nominativa relacionada en factura global</option>
+      </select>
+    </div>
+
+    <div class="modal-cfdi-acciones">
+      <button class="btn-cfdi-cancel" (click)="cerrarModalCancelar()">Cerrar</button>
+      <button class="btn-cfdi-confirm"
+              (click)="confirmarCancelacion()"
+              [disabled]="!motivoCancelacion || procesandoCfdiId !== null">
+        Confirmar Cancelación
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVIAR CORREO -->
+<div class="modal-overlay-cfdi no-print" *ngIf="modalEmail">
+  <div class="modal-cfdi">
+    <h3 class="modal-cfdi-titulo modal-timbrar-titulo">Enviar Factura por Correo</h3>
+
+    <div class="modal-cfdi-info">
+      <div><span>Folio:</span> <strong>{{ cfdiAEnviar?.folio_venta }}</strong></div>
+      <div><span>UUID:</span> <span style="font-family:monospace; font-size:12px;">{{ cfdiAEnviar?.cfdi_uuid }}</span></div>
+      <div><span>Receptor:</span> {{ cfdiAEnviar?.receptor_nombre }}</div>
+    </div>
+
+    <div class="modal-cfdi-field">
+      <label>Correo electrónico del destinatario</label>
+      <input type="email"
+             [(ngModel)]="emailDestino"
+             placeholder="cliente@empresa.com"
+             (keyup.enter)="confirmarEnvioCorreo()">
+    </div>
+
+    <div class="modal-cfdi-acciones">
+      <button class="btn-cfdi-cancel" (click)="cerrarModalEmail()">Cancelar</button>
+      <button class="btn-cfdi-confirm btn-timbrar-confirm"
+              (click)="confirmarEnvioCorreo()"
+              [disabled]="!emailDestino.trim() || enviandoCorreo">
+        {{ enviandoCorreo ? 'Enviando...' : 'Enviar Correo' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TIMBRAR CFDI (datos fiscales) -->
+<div class="modal-overlay-cfdi no-print" *ngIf="modalTimbrar">
+  <div class="modal-cfdi modal-cfdi-timbrar">
+    <h3 class="modal-cfdi-titulo modal-timbrar-titulo">Datos Fiscales para Timbrar</h3>
+
+    <div class="modal-cfdi-info">
+      <div><span>Folio:</span> <strong>{{ cfdiATimbrar?.folio_venta }}</strong></div>
+      <div><span>Total:</span> <strong>${{ cfdiATimbrar?.total_venta | number:'1.2-2' }}</strong></div>
+    </div>
+
+    <!-- RFC + Buscar -->
+    <div class="modal-cfdi-field">
+      <label>RFC Receptor</label>
+      <div class="rfc-row">
+        <input type="text"
+               [(ngModel)]="datosFiscales.receptor_rfc"
+               placeholder="XAXX010101000"
+               (keyup.enter)="buscarClienteFiscal()"
+               style="text-transform: uppercase;">
+        <button class="btn-buscar-rfc" (click)="buscarClienteFiscal()" [disabled]="buscandoRfc">
+          {{ buscandoRfc ? '...' : 'Buscar' }}
+        </button>
+      </div>
+      <div class="cliente-badge" *ngIf="clienteEncontrado">
+        ✓ Cliente guardado: {{ clienteEncontrado.nombre_fiscal }}
+      </div>
+    </div>
+
+    <!-- Nombre / Razón Social -->
+    <div class="modal-cfdi-field">
+      <label>Nombre / Razón Social</label>
+      <input type="text" [(ngModel)]="datosFiscales.receptor_nombre" placeholder="NOMBRE FISCAL COMPLETO">
+    </div>
+
+    <!-- CP + Régimen en dos columnas -->
+    <div class="cfdi-row-2">
+      <div class="modal-cfdi-field">
+        <label>CP Fiscal</label>
+        <input type="text" [(ngModel)]="datosFiscales.receptor_cp" placeholder="00000" maxlength="5">
+      </div>
+      <div class="modal-cfdi-field">
+        <label>Régimen Fiscal</label>
+        <select [(ngModel)]="datosFiscales.receptor_regimen">
+          <option value="">— Selecciona —</option>
+          <option *ngFor="let r of regimenesFiscales" [value]="r.clave">
+            {{ r.clave }} — {{ r.descripcion }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Uso CFDI -->
+    <div class="modal-cfdi-field">
+      <label>Uso CFDI</label>
+      <select [(ngModel)]="datosFiscales.uso_cfdi">
+        <option value="">— Selecciona —</option>
+        <option *ngFor="let u of usosCfdi" [value]="u.clave">
+          {{ u.clave }} — {{ u.descripcion }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Guardar cliente -->
+    <div class="cfdi-guardar-row">
+      <label class="cfdi-check-label">
+        <input type="checkbox" [(ngModel)]="datosFiscales.guardar_cliente">
+        {{ clienteEncontrado ? 'Actualizar datos del cliente guardado' : 'Guardar cliente para futuros timbrados' }}
+      </label>
+    </div>
+
+    <div class="modal-cfdi-acciones">
+      <button class="btn-cfdi-cancel" (click)="cerrarModalTimbrar()">Cancelar</button>
+      <button class="btn-cfdi-confirm btn-timbrar-confirm"
+              (click)="confirmarTimbrado()"
+              [disabled]="!datosFiscalesValidos || procesandoCfdiId !== null">
+        Timbrar CFDI
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTA DE VENTA -->
+<div class="ticket-overlay" *ngIf="ticketNota">
+  <div class="ticket-print">
+
+    <div class="ticket-header">
+      <img [src]="ticketNota.logoUrl" class="ticket-logo" alt="logo">
+      <div class="ticket-negocio">{{ ticketNota.nombreNegocio }}</div>
+    </div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <div class="ticket-datos">
+      <div class="ticket-dato-row"><span>Folio:</span><strong>{{ ticketNota.folio }}</strong></div>
+      <div class="ticket-dato-row"><span>Fecha:</span><span>{{ ticketNota.fecha }}</span></div>
+      <div class="ticket-dato-row"><span>Hora:</span><span>{{ ticketNota.hora }}</span></div>
+      <div class="ticket-dato-row"><span>Cajero:</span><span>{{ ticketNota.cajero }}</span></div>
+      <div class="ticket-dato-row"><span>Tipo:</span><span>{{ ticketNota.tipoVenta }}</span></div>
+    </div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <table class="ticket-tabla">
+      <thead>
+        <tr>
+          <th class="col-nombre">Producto</th>
+          <th class="col-num">Cant.</th>
+          <th class="col-num">P.U.</th>
+          <th class="col-num">Sub.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of ticketNota.items">
+          <td class="col-nombre">{{ item.nombre }}</td>
+          <td class="col-num">{{ item.cantidad }}</td>
+          <td class="col-num">${{ item.precio_venta | number:'1.2-2' }}</td>
+          <td class="col-num">${{ item.subtotal | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <div class="ticket-total">TOTAL: ${{ ticketNota.total | number:'1.2-2' }}</div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <div class="ticket-gracias">¡Gracias por su compra!</div>
+
+    <div class="ticket-acciones no-print">
+      <button class="btn-imprimir" (click)="imprimirNota()">🖨️ Imprimir / PDF</button>
+      <button class="btn-cerrar-ticket" (click)="cerrarNota()">✕ Cerrar</button>
+    </div>
+
   </div>
 </div>

@@ -1,54 +1,137 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/login/login.component';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { UsuariosComponent } from './pages/usuarios/usuarios.component';
-import { NotificacionesComponent } from './pages/notificaciones/notificaciones.component';
-
+import { authGuard } from './core/auth/auth.guard';
+import { adminGuard } from './core/auth/admin.guard';
+import { superadminGuard } from './core/auth/superadmin.guard';
 
 export const routes: Routes = [
-  // Ruta por defecto
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  // Landing page (pública)
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent)
+  },
 
-  // Auth
-  { path: 'login', component: LoginComponent },
+  // Términos y Condiciones / Aviso de Privacidad (público)
+  {
+    path: 'terminos',
+    loadComponent: () => import('./pages/terminos/terminos.component').then(m => m.TerminosComponent)
+  },
 
-  // Dashboard
-  { path: 'dashboard', component: DashboardComponent },
+  // Auth (Rutas públicas)
+  {
+    path: 'login',
+    loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'registro',
+    loadComponent: () => import('./auth/registro/registro.component').then(m => m.RegistroComponent)
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () => import('./auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent)
+  },
 
-  // Usuarios
-  { path: 'usuarios', component: UsuariosComponent },
+  // Dashboard (Protegida)
+  { 
+    path: 'dashboard', 
+    canActivate: [authGuard],
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent) 
+  },
 
-  // Notificaciones
-  { path: 'notificaciones', component: NotificacionesComponent },
+  // Usuarios (Protegida)
+  { 
+    path: 'usuarios', 
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/usuarios/usuarios.component').then(m => m.UsuariosComponent) 
+  },
 
-  // Reportes (standalone)
+  // Notificaciones (Protegida)
+  { 
+    path: 'notificaciones', 
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/notificaciones/notificaciones.component').then(m => m.NotificacionesComponent) 
+  },
+
+  // Reportes (Protegida)
   { 
     path: 'reportes', 
-    loadComponent: () =>
-      import('./pages/reportes/reportes.component').then(m => m.ReportesComponent)
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/reportes/reportes.component').then(m => m.ReportesComponent)
   },
 
-  // Caja (standalone)
+  // Caja (Protegida)
   { 
     path: 'caja', 
-    loadComponent: () =>
-      import('./pages/caja/caja.component').then(m => m.CajaComponent)
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/caja/caja.component').then(m => m.CajaComponent)
   },
-  { 
-  path: 'inventario', 
-  loadComponent: () => import('./pages/inventario/inventario.component')
-    .then(m => m.InventarioComponent) 
-},
-{
-  path: 'cortecaja',
-  loadComponent: () => import('./pages/cortecaja/cortecaja.component')
-    .then(m => m.CortecajaComponent)
-},
-  // Inventario (standalone)
+  
+  // Inventario (Protegida)
   { 
     path: 'inventario', 
-    loadComponent: () =>
-      import('./pages/inventario/inventario.component').then(m => m.InventarioComponent)
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/inventario/inventario.component').then(m => m.InventarioComponent) 
+  },
+
+  // Corte de Caja (Protegida)
+  {
+    path: 'cortecaja',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cortecaja/cortecaja.component').then(m => m.CortecajaComponent)
+  },
+
+  // Escáner móvil (Pública — accede desde el celular via QR)
+  {
+    path: 'escaner/:salaId',
+    loadComponent: () => import('./pages/escaner/escaner.component').then(m => m.EscanerComponent)
+  },
+
+  // Mapa de sucursales (Solo admin)
+  {
+    path: 'sucursales',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./pages/sucursales-map/sucursales-map.component').then(m => m.SucursalesMapComponent)
+  },
+
+  // Alta de sucursal (Solo admin)
+  {
+    path: 'sucursales/nueva',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./pages/alta-sucursal/alta-sucursal.component').then(m => m.AltaSucursalComponent)
+  },
+
+  // Proveedores (Protegida)
+  {
+    path: 'proveedores',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/proveedores/proveedores.component').then(m => m.ProveedoresComponent)
+  },
+
+  // Compras / Entradas (Protegida)
+  {
+    path: 'compras',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/compras/compras.component').then(m => m.ComprasComponent)
+  },
+
+  // Devoluciones (Protegida)
+  {
+    path: 'devoluciones',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/devoluciones/devoluciones.component').then(m => m.DevolucionesComponent)
+  },
+
+  // Cotizaciones (Protegida)
+  {
+    path: 'cotizaciones',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/cotizaciones/cotizaciones.component').then(m => m.CotizacionesComponent)
+  },
+
+  // Panel Superadmin (Solo superadmin)
+  {
+    path: 'superadmin',
+    canActivate: [authGuard, superadminGuard],
+    loadComponent: () => import('./pages/superadmin/superadmin.component').then(m => m.SuperadminComponent)
   }
-   
 ];

@@ -1,0 +1,99 @@
+<div class="page-container">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Proveedores</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-hora">{{ hora }}</span>
+      <span class="topbar-empresa">{{ nombreNegocio }}</span>
+      <app-topbar-perfil></app-topbar-perfil>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="toolbar">
+      <h2>Directorio de Proveedores</h2>
+      <button class="btn-primary" (click)="abrirNuevo()">+ Nuevo proveedor</button>
+    </div>
+
+    @if (cargando) {
+      <div class="estado-vacio">Cargando...</div>
+    } @else if (proveedores.length === 0) {
+      <div class="estado-vacio">
+        <p>📦 Sin proveedores registrados</p>
+        <small>Agrega tus proveedores para gestionar mejor tus compras</small>
+      </div>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Contacto</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Dirección</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of proveedores; track p.proveedor_id) {
+              <tr>
+                <td><strong>{{ p.nombre }}</strong></td>
+                <td>{{ p.contacto || '—' }}</td>
+                <td>{{ p.telefono || '—' }}</td>
+                <td>{{ p.email || '—' }}</td>
+                <td>{{ p.direccion || '—' }}</td>
+                <td class="acciones">
+                  <button class="btn-icon" (click)="abrirEditar(p)" title="Editar">✏️</button>
+                  <button class="btn-icon danger" (click)="eliminar(p)" title="Eliminar">🗑️</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+  </div>
+
+</div>
+
+<!-- Modal -->
+@if (modalAbierto) {
+  <div class="modal-overlay" (click)="modalAbierto = false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editando ? 'Editar proveedor' : 'Nuevo proveedor' }}</h3>
+
+      <div class="campo">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="form.nombre" placeholder="Nombre del proveedor">
+      </div>
+      <div class="campo">
+        <label>Contacto</label>
+        <input type="text" [(ngModel)]="form.contacto" placeholder="Nombre del contacto">
+      </div>
+      <div class="campo-row">
+        <div class="campo">
+          <label>Teléfono</label>
+          <input type="text" [(ngModel)]="form.telefono" placeholder="55 1234 5678">
+        </div>
+        <div class="campo">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="form.email" placeholder="correo@empresa.com">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Dirección</label>
+        <textarea [(ngModel)]="form.direccion" rows="2" placeholder="Calle, colonia, ciudad..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="modalAbierto = false">Cancelar</button>
+        <button class="btn-primary" (click)="guardar()" [disabled]="!form.nombre.trim()">Guardar</button>
+      </div>
+    </div>
+  </div>
+}

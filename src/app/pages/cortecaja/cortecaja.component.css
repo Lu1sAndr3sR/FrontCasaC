@@ -1,12 +1,6 @@
 /* Import font optionally (uncomment if you want Montserrat) */
 /* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap'); */
 
-:root{
-  --dark-bg: #222528; /* panel background */
-  --topbar: #1f2325;  /* top dark bar */
-  --accent-red: #d32f2f;
-}
-
 /* page full */
 .page-root {
   min-height: 100vh;
@@ -26,7 +20,9 @@
   justify-content:space-between;
 }
 .logo {
-  height:56px;
+  height: 60px;
+  width: auto;
+  object-fit: contain;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
 }
 .top-right { text-align:right; font-size:13px; color:#000000; }
@@ -159,7 +155,7 @@
 /* close button */
 .btn-cerrar {
   margin-top:18px;
-  background: var(--accent-red);
+  background: var(--peligro);
   color:#000000;
   border:none;
   padding:12px 24px;

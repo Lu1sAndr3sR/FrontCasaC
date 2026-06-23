@@ -1,24 +1,44 @@
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&display=swap" rel="stylesheet">
+﻿<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <div class="caja-container">
 
     <div class="top-bar">
-        <img src="assets/logoC.png" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
+        <img [src]="negocioService.logoActivo" class="logo" alt="logo" routerLink="/dashboard" style="cursor: pointer;">
 
         <div class="top-info">
             <span>CAJERO: <strong style="color: #4cd96f;">{{ nombreCajero }}</strong></span>
             <span>FECHA: {{ fechaActual }}</span>
             <span>HORA: {{ horaActual }}</span>
+            <app-topbar-perfil></app-topbar-perfil>
         </div>
     </div>
 
     <div class="search-bar">
-        <input type="text" 
-               placeholder="ESCANEAR CÓDIGO O ESCRIBIR NOMBRE..." 
+        <input type="text"
+               placeholder="ESCANEAR CÓDIGO O ESCRIBIR NOMBRE..."
                [(ngModel)]="busqueda"
                (keyup.enter)="buscarProducto()"
                autofocus>
         <span class="search-icon" (click)="buscarProducto()">🔍</span>
+        <button class="btn-vincular" (click)="toggleQR()">📱 Vincular Celular</button>
+    </div>
+
+    <!-- Dropdown: múltiples productos con el mismo nombre -->
+    <div class="resultados-dropdown" *ngIf="resultadosBusqueda.length > 1">
+      <div class="res-titulo">Selecciona el producto:</div>
+      <div class="res-item" *ngFor="let p of resultadosBusqueda" (click)="seleccionarProducto(p)">
+        <span class="res-nombre">{{ p.nombre }}</span>
+        <span class="res-codigo">{{ p.codigo_barras || '—' }}</span>
+        <span class="res-precio">${{ p.precio_menudeo | number:'1.2-2' }}</span>
+        <span class="res-stock" [class.stock-bajo]="p.stock_actual <= 3">Stock: {{ p.stock_actual }}</span>
+      </div>
+    </div>
+
+    <div class="qr-panel" *ngIf="mostrarQR">
+        <p class="qr-titulo">Escanea desde tu celular para vincular el escáner</p>
+        <qrcode [qrdata]="urlEscaner" [width]="200" colorDark="#1a1a2e" colorLight="#ffffff"></qrcode>
+        <p class="qr-sala">Sala: <strong>{{ salaId }}</strong></p>
+        <button class="btn-cerrar-qr" (click)="toggleQR()">✕ Cerrar</button>
     </div>
 
     <div class="table-container">
@@ -39,15 +59,19 @@
 
                 <div style="justify-content: flex-start; padding-left: 10px;">{{ item.nombre }}</div>
 
-                <div>
-                    <input type="number" 
-                           [(ngModel)]="item.cantidad" 
-                           (change)="actualizarCantidad(i)" 
-                           class="input-cantidad"
-                           min="1">
+                <div class="cantidad-control">
+                    <button class="btn-cant" (click)="decrementarCantidad(i)" [disabled]="item.cantidad <= 1">−</button>
+                    <span class="cant-valor" [class.stock-limite]="item.cantidad >= item.stock_actual">{{ item.cantidad }}</span>
+                    <button class="btn-cant" (click)="incrementarCantidad(i)" [disabled]="item.cantidad >= item.stock_actual">+</button>
                 </div>
 
-                <div>${{ item.precio_venta | number:'1.2-2' }}</div>
+                <div>
+                    ${{ item.precio_venta | number:'1.2-2' }}
+                    <span class="badge-mayoreo"
+                        *ngIf="item.minimo_mayoreo && item.cantidad >= item.minimo_mayoreo">
+                        MAY
+                    </span>
+                </div>
 
                 <div style="font-weight: bold;">${{ item.subtotal | number:'1.2-2' }}</div>
 
@@ -64,36 +88,232 @@
     </div>
 
     <div class="footer-area">
+
         <div class="total-display">
+            <ng-container *ngIf="negocioService.ivaActivo">
+                <span class="desglose-line">Subtotal: ${{ subtotalSinIva | number:'1.2-2' }}</span>
+                <span class="desglose-line">IVA ({{ negocioService.ivaPorcentaje }}%): ${{ montoIva | number:'1.2-2' }}</span>
+            </ng-container>
             TOTAL: ${{ totalVenta | number:'1.2-2' }}
         </div>
 
-        <div class="venta-tipo-control">
-            <div class="tipo-selector">
-                <span>TIPO DE VENTA:</span>
-                <button 
-                    (click)="tipoVentaSeleccionado = 'Tienda'; numeroPedidoInput = ''" 
-                    [class.active]="tipoVentaSeleccionado === 'Tienda'">
-                    EN TIENDA
-                </button>
-                <button 
-                    (click)="tipoVentaSeleccionado = 'Pedido'" 
-                    [class.active]="tipoVentaSeleccionado === 'Pedido'">
-                    POR PEDIDO
-                </button>
-            </div>
-
-            <div class="pedido-input" *ngIf="tipoVentaSeleccionado === 'Pedido'">
-                <input type="text" 
-                       placeholder="NÚMERO DE PEDIDO" 
-                       [(ngModel)]="numeroPedidoInput">
-            </div>
+        <div class="folio-display">
+            FOLIO<br><strong>{{ folioActual }}</strong>
         </div>
-        
+
+        <div class="tipo-venta">
+            <button [class.tipo-activo]="tipoVenta === 'Tienda'" (click)="tipoVenta = 'Tienda'">TIENDA</button>
+            <button [class.tipo-activo]="tipoVenta === 'Pedido'" (click)="tipoVenta = 'Pedido'">PEDIDO</button>
+        </div>
+
         <div class="buttons">
             <button class="cancelar" (click)="cancelar()">CANCELAR</button>
-            <button class="cobrar" (click)="cobrar()">COBRAR</button>
+            <button class="cobrar" (click)="abrirModalCobro()" [disabled]="pagando">COBRAR</button>
         </div>
+
     </div>
 
+</div>
+
+<!-- ASISTENTE IA FLOTANTE -->
+<div class="asistente-fab" (click)="toggleAsistente()" title="Asistente IA">
+  🤖
+</div>
+
+<div class="asistente-panel" *ngIf="mostrarAsistente">
+  <div class="asistente-header">
+    <span>🤖 Asistente de Caja</span>
+    <button class="asistente-close" (click)="toggleAsistente()">✕</button>
+  </div>
+  <div class="asistente-body">
+    <div class="asistente-respuesta" *ngIf="respuestaAsistente || cargandoAsistente">
+      <span *ngIf="cargandoAsistente" style="color:#aaa;">⏳ Consultando...</span>
+      <span *ngIf="!cargandoAsistente">{{ respuestaAsistente }}</span>
+    </div>
+    <div class="asistente-hint" *ngIf="!respuestaAsistente && !cargandoAsistente">
+      Pregunta sobre precios, stock, descuentos...
+    </div>
+  </div>
+  <div class="asistente-footer">
+    <input class="asistente-input"
+           type="text"
+           placeholder="Ej: ¿Precio de tornillo 3/8?"
+           [(ngModel)]="preguntaAsistente"
+           (keyup.enter)="enviarPreguntaAsistente()"
+           [disabled]="cargandoAsistente">
+    <button class="asistente-send" (click)="enviarPreguntaAsistente()" [disabled]="cargandoAsistente || !preguntaAsistente.trim()">
+      ➤
+    </button>
+  </div>
+</div>
+
+<!-- MODAL DE COBRO -->
+<div class="cobro-overlay" *ngIf="modalCobro">
+  <div class="cobro-modal">
+
+    <h2 class="cobro-titulo">Confirmar Cobro</h2>
+
+    <div class="cobro-total-box">
+      <ng-container *ngIf="negocioService.ivaActivo">
+        <span class="cobro-desglose">Subtotal: ${{ subtotalSinIva | number:'1.2-2' }}</span>
+        <span class="cobro-desglose">IVA ({{ negocioService.ivaPorcentaje }}%): ${{ montoIva | number:'1.2-2' }}</span>
+      </ng-container>
+      <ng-container *ngIf="descuentoPorcentaje > 0">
+        <span class="cobro-desglose">Descuento ({{ descuentoPorcentaje }}%): -${{ (totalVenta - totalConDescuento) | number:'1.2-2' }}</span>
+      </ng-container>
+      <span class="cobro-monto">TOTAL: ${{ totalConDescuento | number:'1.2-2' }}</span>
+    </div>
+
+    <!-- Descuento -->
+    <div class="cobro-field">
+      <label class="cobro-label">Descuento (%)</label>
+      <div class="descuento-rapido">
+        <button *ngFor="let d of [5, 10, 15, 20]"
+          class="btn-desc-rapido"
+          [class.activo]="descuentoPorcentaje === d"
+          (click)="descuentoPorcentaje = descuentoPorcentaje === d ? 0 : d">
+          {{ d }}%
+        </button>
+        <input class="cobro-input desc-custom" type="number" [(ngModel)]="descuentoPorcentaje"
+          min="0" max="100" step="1" placeholder="Otro %" (input)="clampDescuento()">
+      </div>
+    </div>
+
+    <!-- Forma de pago SAT (engloba todo) -->
+    <div class="cobro-field">
+      <label class="cobro-label">Forma de Pago</label>
+      <select class="cobro-select" [(ngModel)]="formaPago">
+        <option *ngFor="let f of formasPago" [value]="f.clave">{{ f.clave }} — {{ f.descripcion }}</option>
+      </select>
+    </div>
+
+    <div class="cobro-toggle-row">
+      <label class="toggle-label">
+        <input type="checkbox" [(ngModel)]="requiereFactura">
+        <span>¿Requiere Factura?</span>
+      </label>
+    </div>
+
+    <div class="cobro-cfdi-panel" *ngIf="requiereFactura">
+
+      <div class="cobro-field cobro-rfc-row">
+        <label class="cobro-label">RFC del Receptor</label>
+        <div class="rfc-group">
+          <input class="cobro-input" type="text" [(ngModel)]="datosCfdi.receptor_rfc"
+                 placeholder="XAXX010101000" maxlength="13"
+                 style="text-transform:uppercase;">
+          <button class="btn-buscar-rfc" (click)="buscarCliente()" [disabled]="buscandoCliente">
+            {{ buscandoCliente ? '...' : 'Buscar' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="cobro-field">
+        <label class="cobro-label">Nombre o Razón Social</label>
+        <input class="cobro-input" type="text" [(ngModel)]="datosCfdi.receptor_nombre"
+               placeholder="Nombre completo o razón social">
+      </div>
+
+      <div class="cobro-two-col">
+        <div class="cobro-field">
+          <label class="cobro-label">CP Fiscal</label>
+          <input class="cobro-input" type="text" [(ngModel)]="datosCfdi.receptor_cp"
+                 placeholder="64000" maxlength="5">
+        </div>
+        <div class="cobro-field">
+          <label class="cobro-label">Régimen Fiscal</label>
+          <select class="cobro-select" [(ngModel)]="datosCfdi.receptor_regimen">
+            <option value="">— Selecciona —</option>
+            <option *ngFor="let r of regimenesFiscales" [value]="r.clave">
+              {{ r.clave }} — {{ r.descripcion }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cobro-field">
+        <label class="cobro-label">Uso del CFDI</label>
+        <select class="cobro-select" [(ngModel)]="datosCfdi.uso_cfdi">
+          <option *ngFor="let u of usosCfdi" [value]="u.clave">
+            {{ u.clave }} — {{ u.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <label class="toggle-label guardar-toggle">
+        <input type="checkbox" [(ngModel)]="datosCfdi.guardar_cliente">
+        <span>Guardar datos de este cliente para la próxima vez</span>
+      </label>
+
+    </div>
+
+    <div class="cobro-acciones">
+      <button class="btn-cobro-cancelar" (click)="cerrarModalCobro()">Cancelar</button>
+      <button class="btn-cobro-confirmar" (click)="confirmarCobro()" [disabled]="pagando">
+        {{ pagando ? 'Procesando...' : 'Confirmar Cobro' }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- TICKET DE VENTA -->
+<div class="ticket-overlay" *ngIf="ticketVenta">
+  <div class="ticket-print">
+
+    <div class="ticket-header">
+      <img [src]="ticketVenta.logoUrl" class="ticket-logo" alt="logo">
+      <div class="ticket-negocio">{{ ticketVenta.nombreNegocio }}</div>
+    </div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <div class="ticket-datos">
+      <div class="ticket-dato-row"><span>Folio:</span><strong>{{ ticketVenta.folio }}</strong></div>
+      <div class="ticket-dato-row"><span>Fecha:</span><span>{{ ticketVenta.fecha }}</span></div>
+      <div class="ticket-dato-row"><span>Hora:</span><span>{{ ticketVenta.hora }}</span></div>
+      <div class="ticket-dato-row"><span>Cajero:</span><span>{{ ticketVenta.cajero }}</span></div>
+      <div class="ticket-dato-row"><span>Tipo:</span><span>{{ ticketVenta.tipoVenta }}</span></div>
+    </div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <table class="ticket-tabla">
+      <thead>
+        <tr>
+          <th class="col-nombre">Producto</th>
+          <th class="col-num">Cant.</th>
+          <th class="col-num">P.U.</th>
+          <th class="col-num">Sub.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of ticketVenta.items">
+          <td class="col-nombre">{{ item.nombre }}</td>
+          <td class="col-num">{{ item.cantidad }}</td>
+          <td class="col-num">${{ item.precio_venta | number:'1.2-2' }}</td>
+          <td class="col-num">${{ item.subtotal | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <ng-container *ngIf="ticketVenta.ivaActivo">
+      <div class="ticket-dato-row"><span>Subtotal:</span><span>${{ ticketVenta.subtotalSinIva | number:'1.2-2' }}</span></div>
+      <div class="ticket-dato-row"><span>IVA ({{ ticketVenta.ivaPorcentaje }}%):</span><span>${{ ticketVenta.montoIva | number:'1.2-2' }}</span></div>
+    </ng-container>
+
+    <div class="ticket-total">TOTAL: ${{ ticketVenta.total | number:'1.2-2' }}</div>
+
+    <div class="ticket-sep">────────────────────</div>
+
+    <div class="ticket-gracias">¡Gracias por su compra!</div>
+
+    <div class="ticket-acciones no-print">
+      <button class="btn-imprimir" (click)="imprimirTicket()">🖨️ Imprimir / PDF</button>
+      <button class="btn-cerrar-ticket" (click)="cerrarTicket()">✕ Cerrar</button>
+    </div>
+
+  </div>
 </div>

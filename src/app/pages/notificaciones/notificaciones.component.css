@@ -1,11 +1,4 @@
 /* === ESTRUCTURA PRINCIPAL (Igual a las otras pantallas) === */
-:root {
-  --dark-bg: #222528;
-  --topbar: #1f2325;
-  --accent-red: #d32f2f;
-  --text-gray: #ccc;
-}
-
 .page-root {
   min-height: 100vh;
   background: #f4f4f4;
@@ -22,8 +15,9 @@
 .top-bar-inner {
   display: flex; align-items: center; justify-content: space-between;
 }
-.logo { height: 50px; }
+.logo { height: 60px; width: auto; max-width: 160px; object-fit: contain; }
 .page-title { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: 1px; color: #eee; }
+.suc-badge-noti { font-size: 12px; color: #4cd96f; font-weight: 600; margin-left: 12px; opacity: 0.9; }
 
 /* FONDO PRINCIPAL */
 .main-bg {
@@ -48,7 +42,7 @@
 
 .noti-card {
   background: #fff;
-  border-left: 6px solid var(--accent-red); /* Borde rojo a la izquierda */
+  border-left: 6px solid var(--peligro); /* Borde rojo a la izquierda */
   padding: 20px;
   border-radius: 8px;
   display: flex;
@@ -75,7 +69,7 @@
 
 .text-area h3 {
   margin: 0 0 5px 0;
-  color: var(--accent-red);
+  color: var(--peligro);
   font-size: 16px;
 }
 
@@ -119,7 +113,7 @@
 .empty-state p { color: #aaa; margin-bottom: 30px; }
 
 .btn-back {
-  background: #4cd96f;
+  background: var(--primario);
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -129,7 +123,7 @@
   text-decoration: none;
   display: inline-block;
 }
-.btn-back:hover { background: #3cb85d; }
+.btn-back:hover { background: var(--primario-dark); }
 
 .loading { text-align: center; color: #fff; font-size: 18px; margin-top: 50px; }
 
@@ -139,10 +133,86 @@
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
-
 .clickable:hover {
   transform: translateX(8px);
   background-color: #fcfcfc;
-  border-left-width: 10px; /* Hace el borde rojo más grueso */
+  border-left-width: 10px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+/* Urgencia */
+.urgencia-critica { border-left-color: #d10b0b; }
+.urgencia-alta    { border-left-color: #f77f00; }
+.urgencia-media   { border-left-color: #f4c542; }
+
+.urgencia-critica .text-area h3 { color: #d10b0b; }
+.urgencia-alta    .text-area h3 { color: #f77f00; }
+.urgencia-media   .text-area h3 { color: #c8a200; }
+
+.badges-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+
+.dias-badge {
+  background: #1a1a2e;
+  color: #4cd96f;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+.vel-badge {
+  background: #2c3e50;
+  color: #4cc9f0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Barra IA */
+.ia-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.btn-ia {
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.btn-ia:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-ia:hover:not(:disabled) { opacity: 0.85; }
+
+.ia-hint { color: #aaa; font-size: 12px; }
+
+.ia-resultado {
+  background: rgba(255,255,255,0.05);
+  border-left: 4px solid #8e2de2;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  color: #fff;
+}
+.ia-resultado h4 { margin: 0 0 10px 0; color: #c78cf7; font-size: 14px; }
+.ia-texto {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 13px;
+  color: #e0e0e0;
+  margin: 0;
+  line-height: 1.6;
+}
+.ia-error {
+  background: rgba(209,11,11,0.15);
+  border: 1px solid #d10b0b;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #ff6b6b;
+  font-size: 13px;
+  margin-bottom: 16px;
 }

@@ -1,0 +1,34 @@
+<div class="modal-backdrop" (click)="cerrar()"></div>
+
+<div class="modal-selector">
+  <div class="modal-header">
+    <h3>Seleccionar Sucursal</h3>
+    <button class="btn-x" (click)="cerrar()">✕</button>
+  </div>
+
+  <div class="modal-body">
+    @if (cargando) {
+      <p class="cargando">Cargando sucursales…</p>
+    }
+
+    @for (s of sucursales; track s.sucursal_id) {
+      <div
+        class="sucursal-item"
+        [class.activa]="s.sucursal_id === sucursalActivaService.sucursalId"
+        (click)="seleccionar(s)"
+      >
+        <div class="suc-nombre">
+          {{ s.nombre }}
+          @if (s.sucursal_id === sucursalActivaService.sucursalId) {
+            <span class="badge-activa">Activa</span>
+          }
+        </div>
+        <div class="suc-detalle">{{ s.direccion || 'Sin dirección' }} · CP {{ s.cp_sat }}</div>
+      </div>
+    }
+
+    @if (!cargando && sucursales.length === 0) {
+      <p class="vacio">No hay sucursales registradas.</p>
+    }
+  </div>
+</div>

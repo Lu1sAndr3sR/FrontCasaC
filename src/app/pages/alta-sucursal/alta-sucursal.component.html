@@ -1,0 +1,71 @@
+<div class="alta-page">
+
+  <div class="alta-header">
+    <button class="btn-volver" routerLink="/sucursales">← Mapa</button>
+    <h2>Nueva Sucursal</h2>
+  </div>
+
+  <div class="alta-card">
+
+    <div class="field">
+      <label>Nombre de la sucursal *</label>
+      <input type="text" [(ngModel)]="form.nombre" placeholder="Ej. Sucursal Centro" />
+    </div>
+
+    <div class="field">
+      <label>Dirección (calle y número)</label>
+      <input type="text" [(ngModel)]="form.direccion" placeholder="Ej. Av. Principal 123" />
+    </div>
+
+    <div class="field">
+      <label>
+        Código Postal (SAT) *
+        @if (buscandoCp) { <span class="buscando">buscando…</span> }
+        @if (cpValido)   { <span class="cp-ok">✓ CP válido · {{ colonias.length }} colonias</span> }
+      </label>
+      <input
+        type="text"
+        [(ngModel)]="form.cp_sat"
+        (ngModelChange)="onCpChange()"
+        placeholder="5 dígitos"
+        maxlength="5"
+      />
+    </div>
+
+    @if (colonias.length > 0) {
+      <div class="field">
+        <label>Colonia</label>
+        <select [(ngModel)]="form.colonia">
+          <option value="">— Seleccionar colonia —</option>
+          @for (c of colonias; track c.colonia) {
+            <option [value]="c.colonia">{{ c.colonia }} ({{ c.tipo_asentamiento }})</option>
+          }
+        </select>
+      </div>
+    }
+
+    <div class="field">
+      <label>Ubicación en el mapa <span class="hint">(haz clic para marcar)</span></label>
+      <div id="mapa-selector" class="mapa-selector"></div>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Latitud</label>
+        <input type="text" [(ngModel)]="form.latitud" placeholder="Clic en el mapa o escribe" readonly />
+      </div>
+      <div class="field">
+        <label>Longitud</label>
+        <input type="text" [(ngModel)]="form.longitud" placeholder="Clic en el mapa o escribe" readonly />
+      </div>
+    </div>
+
+    <div class="alta-acciones">
+      <button class="btn-cancelar" routerLink="/sucursales">Cancelar</button>
+      <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando…' : 'Registrar Sucursal' }}
+      </button>
+    </div>
+
+  </div>
+</div>

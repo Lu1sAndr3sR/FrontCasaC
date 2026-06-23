@@ -1,5 +1,22 @@
 <router-outlet></router-outlet>
 
+<!-- Toast de mensajes del sistema -->
+<div class="msg-toast" [class.visible]="toastService.visible" [ngClass]="toastService.tipo">
+  {{ toastService.mensaje }}
+</div>
+
+<!-- Modal de confirmación global -->
+<div class="confirm-backdrop" *ngIf="confirmService.visible">
+  <div class="confirm-box">
+    <p class="confirm-msg">{{ confirmService.mensaje }}</p>
+    <p class="confirm-detalle" *ngIf="confirmService.detalle">{{ confirmService.detalle }}</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel-confirm" (click)="confirmService.responder(false)">Cancelar</button>
+      <button class="btn-ok-confirm" (click)="confirmService.responder(true)">Aceptar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-notification" 
      [class.show]="mostrarAlerta" 
      (click)="irANotificaciones()">

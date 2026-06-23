@@ -1,5 +1,6 @@
 <div class="topbar">
-  <img src="assets/logoC.png" class="logo" (click)="goDashboard()">
+  <img [src]="negocioService.logoActivo" class="logo" (click)="goDashboard()">
+  <app-topbar-perfil></app-topbar-perfil>
 </div>
 
 <div class="usuarios-wrapper">
@@ -9,127 +10,360 @@
   <div class="header-line">
     <h2 class="titulo">Gestión de Usuarios</h2>
     <div class="buscador-container">
-      <input type="text" placeholder="Buscar..." (input)="buscarUsuario($any($event.target).value)">
+      <input type="text" placeholder="Buscar..." #inputBuscar (input)="buscarUsuario(inputBuscar.value)">
       <button class="btn-lupa"><img src="assets/buscar.png"></button>
     </div>
   </div>
 
   <div class="lista-usuarios">
-    <div class="usuario-item" *ngFor="let u of usuarios">
-      
+    <div class="usr-cargando" *ngIf="cargandoUsuarios">
+      <div class="usr-spinner"></div><span>Cargando usuarios…</span>
+    </div>
+    <div class="usuario-item" *ngFor="let u of usuarios" [class.desactivado]="u.activo === false">
+
       <div class="icono-usuario">
-        <svg width="40" height="40" fill="#0A2647" *ngIf="u.rol === 'ADMINISTRADOR'">
-             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        <svg width="40" height="40" fill="currentColor" *ngIf="u.rol === 'ADMINISTRADOR'">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
         </svg>
-        <svg width="40" height="40" fill="#0A2647" *ngIf="u.rol !== 'ADMINISTRADOR'">
-            <circle cx="20" cy="12" r="8"></circle>
-            <rect x="6" y="22" width="28" height="14" rx="7"></rect>
+        <svg width="40" height="40" fill="currentColor" *ngIf="u.rol !== 'ADMINISTRADOR'">
+          <circle cx="20" cy="12" r="8"></circle>
+          <rect x="6" y="22" width="28" height="14" rx="7"></rect>
         </svg>
       </div>
 
       <div class="datos-usuario">
-        <p class="nombre">{{ u.nombre }}</p>
+        <p class="nombre">
+          {{ u.nombre }}
+          <span *ngIf="u.usuario === usuarioActual" class="badge-tu">Tú</span>
+          <span *ngIf="u.activo === false" class="badge-inactivo">Inactivo</span>
+        </p>
         <p class="rol">{{ u.rol }}</p>
+        <p class="sucursal-chip">🏬 {{ nombreSucursal(u.sucursal_id) }}</p>
       </div>
 
-      <div class="acciones">
-        <ng-container *ngIf="soyAdmin; else soloLectura">
-            
-            <button class="btn-edit" (click)="abrirEditar(u)">
-              <img src="assets/Editar.png" width="28">
-            </button>
-    
-            <button class="btn-delete" 
-                    (click)="abrirEliminar(u)" 
-                    *ngIf="u.usuario !== usuarioActual">
-              <img src="assets/Eliminar.png" width="28">
-            </button>
+      <div class="acciones" *ngIf="soyAdmin && u.usuario !== usuarioActual">
+        <button class="btn-accion btn-mover" title="Cambiar sucursal" (click)="abrirCambiarSucursal(u)">
+          🔀
+        </button>
+        <button class="btn-accion btn-desactivar" title="Desactivar acceso"
+          *ngIf="u.activo !== false" (click)="desactivarUsuario(u)">
+          🚫
+        </button>
+        <button class="btn-accion btn-reactivar" title="Reactivar acceso"
+          *ngIf="u.activo === false" (click)="reactivarUsuario(u)">
+          ✅
+        </button>
+      </div>
 
-            <span *ngIf="u.usuario === usuarioActual" 
-                  style="font-size: 0.8rem; color: #888; font-weight: bold;">
-                  (Tú)
-            </span>
+      <div class="acciones" *ngIf="!soyAdmin || u.usuario === usuarioActual">
+        <span style="font-size:12px;color:#666">Solo lectura</span>
+      </div>
 
-        </ng-container>
+    </div>
+  </div>
 
-        <ng-template #soloLectura>
-            <span style="font-size: 0.8rem; color: #888;">Solo Lectura</span>
-        </ng-template>
+  <button class="btn-invitar" (click)="abrirInvitar()" *ngIf="soyAdmin">
+    + Invitar persona
+  </button>
+
+  <!-- ── MI PERFIL (visible para todos) ─────────────────────────── -->
+  <div class="perfil-section">
+    <h3 class="apariencia-titulo">Mi Perfil</h3>
+
+    <div class="perfil-form">
+      <div class="perfil-avatar-wrap">
+        <div class="perfil-avatar" [class.tiene-foto]="fotoPerfilActual">
+          <img *ngIf="fotoPerfilActual" [src]="fotoPerfilActual" alt="Foto de perfil">
+          <span *ngIf="!fotoPerfilActual" class="avatar-iniciales">
+            {{ usuarioActual ? usuarioActual[0].toUpperCase() : '?' }}
+          </span>
+        </div>
+
+        <div class="perfil-avatar-acciones">
+          <label class="btn-subir-logo" [class.cargando]="subiendoFoto">
+            {{ subiendoFoto ? 'Guardando...' : (fotoPerfilActual ? 'Cambiar foto' : 'Subir foto') }}
+            <input type="file" accept="image/*" (change)="onFotoPerfilSeleccionada($event)" hidden [disabled]="subiendoFoto">
+          </label>
+          <button class="btn-quitar-foto" *ngIf="fotoPerfilActual" (click)="quitarFotoPerfil()">
+            Quitar
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <img src="assets/AddUser.png" 
-       class="btn-agregar-img" 
-       (click)="abrirAgregar()"
-       *ngIf="soyAdmin">
+  <div class="iva-section" *ngIf="soyAdmin">
+    <h3 class="apariencia-titulo">Configuración de IVA</h3>
+    <div class="iva-form">
+      <div class="iva-toggle-row">
+        <span>Aplicar IVA en ventas</span>
+        <label class="iva-toggle">
+          <input type="checkbox" [checked]="negocioService.ivaActivo" (change)="toggleIva($event)">
+          <span class="iva-slider"></span>
+        </label>
+      </div>
+      <div class="campo-grupo" *ngIf="negocioService.ivaActivo">
+        <label>Porcentaje de IVA</label>
+        <div class="campo-fila">
+          <input type="number" min="1" max="99" #inputIva [value]="negocioService.ivaPorcentaje" style="max-width:100px;">
+          <span style="font-weight:bold;">%</span>
+          <button class="btn-guardar-campo" (click)="guardarIvaPorcentaje(inputIva.value)">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="negocio-section" *ngIf="soyAdmin">
+    <h3 class="apariencia-titulo">Identidad del Negocio</h3>
+
+    <div class="negocio-form">
+      <div class="negocio-preview">
+        <img [src]="negocioService.logoUrl" class="logo-preview" alt="logo">
+        <span class="negocio-nombre-preview">{{ negocioService.nombreNegocio }}</span>
+      </div>
+
+      <div class="negocio-campos">
+        <div class="campo-grupo">
+          <label>Nombre del negocio</label>
+          <div class="campo-fila">
+            <input
+              type="text"
+              [value]="negocioService.nombreNegocio"
+              #inputNombre
+              placeholder="Ej. Ferretería González"
+              maxlength="40">
+            <button class="btn-guardar-campo" (click)="guardarNombre(inputNombre.value)">Guardar</button>
+          </div>
+        </div>
+
+        <div class="campo-grupo">
+          <label>Logo del negocio</label>
+          <div class="campo-fila">
+            <label class="btn-subir-logo">
+              Subir imagen
+              <input type="file" accept="image/*" (change)="onLogoSeleccionado($event)" hidden>
+            </label>
+            <span class="hint-logo">PNG, JPG · Recomendado: fondo transparente</span>
+          </div>
+        </div>
+
+        <button class="btn-resetear" (click)="resetearNegocio()">Restaurar valores por defecto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN DE FACTURACIÓN SAT -->
+  <div class="sat-section" *ngIf="soyAdmin">
+    <h3 class="apariencia-titulo">Configuración de Facturación SAT</h3>
+    <div class="sat-form">
+
+      <!-- Datos del Emisor -->
+      <div class="sat-subseccion">
+        <h4 class="sat-sub-titulo">Datos del Emisor</h4>
+        <div class="sat-grid-2">
+          <div class="campo-grupo">
+            <label>RFC del Negocio</label>
+            <input type="text" [(ngModel)]="formConfig.rfc_emisor" placeholder="XAXX010101000" style="text-transform:uppercase;">
+          </div>
+          <div class="campo-grupo">
+            <label>CP Fiscal</label>
+            <input type="text" [(ngModel)]="formConfig.cp_emisor" placeholder="00000" maxlength="5">
+          </div>
+        </div>
+        <div class="campo-grupo">
+          <label>Nombre / Razón Social</label>
+          <input type="text" [(ngModel)]="formConfig.nombre_emisor" placeholder="MI EMPRESA SA DE CV">
+        </div>
+        <div class="campo-grupo">
+          <label>Régimen Fiscal del Emisor</label>
+          <select [(ngModel)]="formConfig.regimen_emisor">
+            <option value="">— Selecciona —</option>
+            <option *ngFor="let r of regimenesFiscales" [value]="r.clave">{{ r.clave }} — {{ r.descripcion }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- CSD -->
+      <div class="sat-subseccion">
+        <h4 class="sat-sub-titulo">Certificado de Sello Digital (CSD)</h4>
+        <p class="sat-hint">Archivos proporcionados por el SAT al tramitar el CSD. Extensiones: <strong>.cer</strong> y <strong>.key</strong></p>
+        <div class="sat-grid-2">
+          <div class="campo-grupo">
+            <label>Certificado (.cer)</label>
+            <div class="csd-upload-row">
+              <span class="csd-badge-ok" *ngIf="configFiscal?.csd_cert_configurado && !formConfig.csd_cert_b64">✓ Configurado</span>
+              <span class="csd-badge-nuevo" *ngIf="formConfig.csd_cert_b64">✓ Archivo listo</span>
+              <label class="btn-subir-logo">
+                {{ configFiscal?.csd_cert_configurado ? 'Cambiar .cer' : 'Subir .cer' }}
+                <input type="file" accept=".cer" (change)="onCertSeleccionado($event)" hidden>
+              </label>
+            </div>
+          </div>
+          <div class="campo-grupo">
+            <label>Llave Privada (.key)</label>
+            <div class="csd-upload-row">
+              <span class="csd-badge-ok" *ngIf="configFiscal?.csd_key_configurado && !formConfig.csd_key_b64">✓ Configurado</span>
+              <span class="csd-badge-nuevo" *ngIf="formConfig.csd_key_b64">✓ Archivo listo</span>
+              <label class="btn-subir-logo">
+                {{ configFiscal?.csd_key_configurado ? 'Cambiar .key' : 'Subir .key' }}
+                <input type="file" accept=".key" (change)="onKeySeleccionado($event)" hidden>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="campo-grupo">
+          <label>Contraseña del Sello</label>
+          <input type="password" [(ngModel)]="formConfig.csd_password"
+                 [placeholder]="configFiscal?.csd_password_configurado ? '●●●●●●●● (configurada — vacío para no cambiar)' : 'Contraseña del archivo .key'">
+        </div>
+      </div>
+
+      <!-- PAC -->
+      <div class="sat-subseccion">
+        <h4 class="sat-sub-titulo">PAC (Proveedor Autorizado de Certificación)</h4>
+        <p class="sat-hint">El PAC timbra legalmente la factura ante el SAT. Ejemplos: Finkok, SW Sapien, Facturama.</p>
+        <div class="sat-grid-2">
+          <div class="campo-grupo">
+            <label>PAC</label>
+            <select [(ngModel)]="formConfig.pac_nombre">
+              <option value="">— Selecciona PAC —</option>
+              <option *ngFor="let p of pacesDisponibles" [value]="p">{{ p }}</option>
+            </select>
+          </div>
+          <div class="campo-grupo">
+            <label>URL del Servicio</label>
+            <input type="text" [(ngModel)]="formConfig.pac_url" placeholder="https://api.pac.com/v1">
+          </div>
+        </div>
+        <div class="sat-grid-2">
+          <div class="campo-grupo">
+            <label>Usuario / API Key</label>
+            <input type="text" [(ngModel)]="formConfig.pac_usuario" placeholder="usuario@empresa.com">
+          </div>
+          <div class="campo-grupo">
+            <label>Contraseña / Secret</label>
+            <input type="password" [(ngModel)]="formConfig.pac_password"
+                   [placeholder]="configFiscal?.pac_password_configurado ? '●●●●●●●● (configurada — vacío para no cambiar)' : 'Contraseña del PAC'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Correo -->
+      <div class="sat-subseccion">
+        <h4 class="sat-sub-titulo">Correo de Notificaciones</h4>
+        <p class="sat-hint">Se usa Gmail. Ingresa tu correo y una <strong>Contraseña de Aplicación</strong> (en Google: Seguridad → Verificación en 2 pasos → Contraseñas de aplicaciones).</p>
+        <div class="campo-grupo">
+          <label>Nombre del remitente</label>
+          <input type="text" [(ngModel)]="formConfig.email_nombre" placeholder="Ferretería González">
+        </div>
+        <div class="campo-grupo">
+          <label>Correo Gmail</label>
+          <input type="email" [(ngModel)]="formConfig.email_user" placeholder="negocio@gmail.com">
+        </div>
+        <div class="campo-grupo">
+          <label>Contraseña de Aplicación</label>
+          <input type="password" [(ngModel)]="formConfig.email_pass"
+                 [placeholder]="configFiscal?.email_pass_configurado ? '●●●●●●●● (configurada — vacío para no cambiar)' : 'xxxx xxxx xxxx xxxx'">
+        </div>
+      </div>
+
+      <button class="btn-guardar-config" (click)="guardarConfigFiscal()" [disabled]="guardandoConfig">
+        {{ guardandoConfig ? 'Guardando...' : 'Guardar Configuración de Facturación' }}
+      </button>
+
+    </div>
+  </div>
+
+
+  <div class="apariencia-section">
+    <h3 class="apariencia-titulo">Apariencia</h3>
+    <div class="temas-grid">
+      <button
+        *ngFor="let tema of themeService.temas"
+        class="tema-btn"
+        [class.activo]="themeService.getTemaActual() === tema.id"
+        (click)="aplicarTemaYGuardar(tema.id)"
+        [title]="tema.nombre">
+        <span class="tema-swatch">
+          <span class="swatch-topbar" [style.background]="tema.topbar"></span>
+          <span class="swatch-primario" [style.background]="tema.primario"></span>
+        </span>
+        <span class="tema-nombre">{{ tema.nombre }}</span>
+      </button>
+    </div>
+  </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="modalAgregar">
+<!-- ── Modal: Invitar persona ─────────────────────────── -->
+<div class="modal-backdrop" *ngIf="modalInvitar">
   <div class="modal-box">
-    <h3>Nuevo Usuario</h3>
+
+    @if (!codigoGenerado) {
+      <h3>Invitar persona</h3>
+      <p class="modal-desc">Elige la sucursal y el rol. Se generará un código de un solo uso que la persona usará al registrarse.</p>
+
+      <div class="form-group">
+        <label>Sucursal</label>
+        <select [(ngModel)]="configInvitacion.sucursal_id">
+          <option [ngValue]="null">— Sin asignar —</option>
+          <option *ngFor="let s of sucursales" [ngValue]="s.sucursal_id">{{ s.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Rol</label>
+        <select [(ngModel)]="configInvitacion.rol_id">
+          <option [ngValue]="2">EMPLEADO</option>
+          <option [ngValue]="1">ADMINISTRADOR</option>
+        </select>
+      </div>
+
+      <div class="modal-botones">
+        <button class="btn-save" (click)="generarCodigoInvitacion()" [disabled]="generandoCodigo">
+          {{ generandoCodigo ? 'Generando...' : 'Generar código' }}
+        </button>
+        <button class="btn-cancel" (click)="cerrarInvitar()">Cancelar</button>
+      </div>
+    }
+
+    @if (codigoGenerado) {
+      <h3>Código listo ✓</h3>
+      <p class="modal-desc">Comparte este código con la persona. Tiene <strong>1 uso</strong> y caduca al usarse.</p>
+
+      <div class="codigo-display">
+        <span class="codigo-texto">{{ codigoGenerado }}</span>
+        <button class="btn-copiar-modal" (click)="copiarCodigo(codigoGenerado)">Copiar</button>
+      </div>
+
+      <p class="modal-desc" style="margin-top:12px;font-size:12px;color:#999;">
+        La persona debe ir a <strong>/registro</strong> e ingresar este código.
+      </p>
+
+      <div class="modal-botones">
+        <button class="btn-save" (click)="cerrarInvitar()">Listo</button>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- ── Modal: Cambiar sucursal ───────────────────────── -->
+<div class="modal-backdrop" *ngIf="modalCambiarSucursal">
+  <div class="modal-box">
+    <h3>Cambiar sucursal</h3>
+    <p class="modal-desc">{{ usuarioCambiando.nombre }}</p>
+
     <div class="form-group">
-      <label>Nombre Completo:</label>
-      <input type="text" [(ngModel)]="nuevoUsuario.nombre" placeholder="Ej. Juan Pérez">
-    </div>
-    <div class="form-group">
-      <label>Usuario (Login):</label>
-      <input type="text" [(ngModel)]="nuevoUsuario.usuario" placeholder="Ej. juanperez">
-    </div>
-    <div class="form-group">
-      <label>Contraseña:</label>
-      <input type="password" [(ngModel)]="nuevoUsuario.contrasena" placeholder="********">
-    </div>
-    <div class="form-group">
-      <label>Rol:</label>
-      <select [(ngModel)]="nuevoUsuario.rol">
-        <option value="EMPLEADO">EMPLEADO</option>
-        <option value="ADMINISTRADOR">ADMINISTRADOR</option>
+      <label>Nueva sucursal</label>
+      <select [(ngModel)]="nuevaSucursalId">
+        <option [ngValue]="null">— Sin asignar —</option>
+        <option *ngFor="let s of sucursales" [ngValue]="s.sucursal_id">{{ s.nombre }}</option>
       </select>
     </div>
-    <div class="modal-botones">
-      <button class="btn-save" (click)="guardarNuevo()">Guardar Usuario</button>
-      <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
 
-<div class="modal-backdrop" *ngIf="modalEditar">
-  <div class="modal-box">
-    <h3>Editar Usuario</h3>
-    <div class="form-group">
-        <label>Nombre:</label>
-        <input [(ngModel)]="usuarioEditando.nombre">
-    </div>
-    <div class="form-group">
-        <label>Usuario (Login):</label>
-        <input [(ngModel)]="usuarioEditando.usuario">
-    </div>
-    <div class="form-group">
-        <label>Nueva Contraseña (Opcional):</label>
-        <input type="password" [(ngModel)]="usuarioEditando.contrasena" placeholder="Dejar vacío para mantener">
-    </div>
-    <div class="form-group">
-        <label>Rol:</label>
-        <select [(ngModel)]="usuarioEditando.rol">
-            <option value="EMPLEADO">EMPLEADO</option>
-            <option value="ADMINISTRADOR">ADMINISTRADOR</option>
-        </select>
-    </div>
     <div class="modal-botones">
-      <button class="btn-save" (click)="guardarEdicion()">Guardar</button>
-      <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-backdrop" *ngIf="modalEliminar">
-  <div class="modal-box">
-    <h3>¿Eliminar usuario?</h3>
-    <p>Se eliminará a: <strong>{{ usuarioEliminando?.nombre }}</strong></p>
-    <div class="modal-botones">
-      <button class="btn-cancel" (click)="confirmarEliminar()">Eliminar</button>
-      <button class="btn-save" style="background:#888;" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-save" (click)="confirmarCambiarSucursal()">Confirmar</button>
+      <button class="btn-cancel" (click)="modalCambiarSucursal = false">Cancelar</button>
     </div>
   </div>
 </div>

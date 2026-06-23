@@ -1,0 +1,301 @@
+<div class="sa-wrapper">
+
+  <!-- Header -->
+  <div class="sa-header">
+    <div class="sa-header-left">
+      <h1>CasaC · Panel de Control</h1>
+      <p>Gestión de empresas registradas</p>
+    </div>
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card total">
+      <span class="stat-num">{{ empresas.length }}</span>
+      <span class="stat-label">Total empresas</span>
+    </div>
+    <div class="stat-card pending">
+      <span class="stat-num">{{ contarEstado('pendiente') }}</span>
+      <span class="stat-label">Pendientes</span>
+    </div>
+    <div class="stat-card active">
+      <span class="stat-num">{{ contarEstado('activa') }}</span>
+      <span class="stat-label">Activas</span>
+    </div>
+    <div class="stat-card suspended">
+      <span class="stat-num">{{ contarEstado('suspendida') + contarEstado('rechazada') }}</span>
+      <span class="stat-label">Suspendidas / Rechazadas</span>
+    </div>
+  </div>
+
+  <!-- Catálogo Maestro -->
+  <div class="catalogo-section">
+    <div class="catalogo-card">
+      <div class="catalogo-info">
+        <span class="catalogo-icon">📦</span>
+        <div>
+          <p class="catalogo-title">Catálogo Base</p>
+          <p class="catalogo-desc">
+            {{ catTotal > 0 ? (catTotal + ' productos · ' + catCategorias + ' categorías') : 'Sin productos aún — importa el Excel para activarlo' }}
+          </p>
+        </div>
+      </div>
+      <div class="catalogo-actions">
+        <label class="cat-admin-btn cat-admin-import" [class.loading]="catImportando">
+          <input type="file" accept=".xlsx" style="display:none" (change)="onArchivoExcelCatalogo($event)" [disabled]="catImportando">
+          {{ catImportando ? 'Importando…' : (catTotal > 0 ? '↻ Reimportar Excel' : '⬆ Importar Excel') }}
+        </label>
+        <button class="cat-admin-btn cat-admin-clear" *ngIf="catTotal > 0"
+                [disabled]="catLimpiando" (click)="limpiarCatalogo()">
+          {{ catLimpiando ? 'Limpiando…' : '🗑 Limpiar catálogo' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filter-row">
+    @for (f of filtros; track f.valor) {
+      <button class="filter-btn" [class.active]="filtroActivo === f.valor" (click)="filtroActivo = f.valor">
+        {{ f.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-section">
+    <div class="table-wrapper">
+      <table class="sa-table">
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Email</th>
+            <th>Sucursales / Usuarios</th>
+            <th>Estado</th>
+            <th>Registro</th>
+            <th>Notas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando) {
+            <tr class="empty-row">
+              <td colspan="7">Cargando empresas...</td>
+            </tr>
+          } @else if (empresasFiltradas.length === 0) {
+            <tr class="empty-row">
+              <td colspan="7">No hay empresas en esta categoría.</td>
+            </tr>
+          } @else {
+            @for (emp of empresasFiltradas; track emp.empresa_id) {
+              <tr (click)="abrirDetalle(emp)" style="cursor:pointer">
+                <td>
+                  <span class="empresa-name">{{ emp.razon_social }}</span>
+                  <span class="empresa-rfc">{{ emp.rfc }}</span>
+                </td>
+                <td>
+                  <span class="empresa-email">{{ emp.email_contacto || '—' }}</span>
+                </td>
+                <td>
+                  <span class="stat-mini">{{ emp.total_sucursales }} suc. · {{ emp.total_usuarios }} usu.</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="'badge-' + emp.estado">{{ emp.estado }}</span>
+                </td>
+                <td>{{ emp.creado_en ? (emp.creado_en | date:'dd/MM/yy') : '—' }}
+</td>
+                <td>
+                  @if (emp.notas_admin) {
+                    <span class="notas-text" [title]="emp.notas_admin">{{ emp.notas_admin }}</span>
+                  } @else {
+                    <span style="color:#ccc;font-size:12px;">—</span>
+                  }
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="actions-cell">
+                    @if (emp.estado === 'pendiente') {
+                      <button class="btn-action btn-aprobar"  [disabled]="procesando" (click)="abrirModal(emp, 'aprobar')">Aprobar</button>
+                      <button class="btn-action btn-rechazar" [disabled]="procesando" (click)="abrirModal(emp, 'rechazar')">Rechazar</button>
+                    }
+                    @if (emp.estado === 'activa') {
+                      <button class="btn-action btn-suspender" [disabled]="procesando" (click)="abrirModal(emp, 'suspender')">Suspender</button>
+                    }
+                    @if (emp.estado === 'suspendida' || emp.estado === 'rechazada') {
+                      <button class="btn-action btn-reactivar" [disabled]="procesando" (click)="ejecutar(emp, 'reactivar')">Reactivar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal de confirmación con notas -->
+@if (modal) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h3>{{ modal.titulo }}</h3>
+      <p>{{ modal.descripcion }}</p>
+      <textarea [(ngModel)]="modal.notas" [placeholder]="modal.notasPlaceholder"></textarea>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-confirm" [ngClass]="modal.colorClass" [disabled]="procesando" (click)="confirmarModal()">
+          {{ procesando ? 'Procesando...' : modal.btnLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Toast -->
+@if (toast) {
+  <div class="toast" [ngClass]="toast.tipo">{{ toast.mensaje }}</div>
+}
+
+<!-- Drawer overlay -->
+@if (drawerAbierto) {
+  <div class="drawer-overlay" (click)="cerrarDrawer()"></div>
+  <div class="drawer">
+
+    <div class="drawer-header">
+      <div>
+        <h2 class="drawer-title">{{ detalle?.empresa?.razon_social }}</h2>
+        <span class="empresa-rfc" style="font-size:12px">{{ detalle?.empresa?.rfc }}</span>
+      </div>
+      <button class="drawer-close" (click)="cerrarDrawer()">✕</button>
+    </div>
+
+    @if (cargandoDetalle) {
+      <div class="drawer-loading">Cargando detalle...</div>
+    } @else if (detalle) {
+
+      <!-- Sucursales -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">Sucursales ({{ detalle.sucursales.length }})</h3>
+        @if (detalle.sucursales.length === 0) {
+          <p class="drawer-empty">Sin sucursales registradas.</p>
+        } @else {
+          <div class="suc-list">
+            @for (s of detalle.sucursales; track s.sucursal_id) {
+              <div class="suc-item">
+                <div>
+                  <span class="suc-nombre">{{ s.nombre }}</span>
+                  <span class="suc-dir">{{ s.direccion || 'Sin dirección' }} · CP {{ s.cp_sat }}</span>
+                </div>
+                <button class="btn-toggle" [ngClass]="s.activa ? 'toggle-on' : 'toggle-off'" (click)="toggleSucursal(s)">
+                  {{ s.activa ? 'Activa' : 'Inactiva' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Usuarios -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">Usuarios ({{ detalle.usuarios.length }})</h3>
+        @if (detalle.usuarios.length === 0) {
+          <p class="drawer-empty">Sin usuarios.</p>
+        } @else {
+          <div class="usr-list">
+            @for (u of detalle.usuarios; track u.usuario_id) {
+              <div class="usr-item">
+                <div class="usr-avatar">{{ u.nombre.charAt(0) }}</div>
+                <div>
+                  <span class="usr-nombre">{{ u.nombre }}</span>
+                  <span class="usr-user">{{ u.usuario }} · {{ u.rol_id === 1 ? 'Admin' : 'Empleado' }}</span>
+                </div>
+                <button class="btn-toggle" [ngClass]="u.activo ? 'toggle-on' : 'toggle-off'" style="margin-left:auto" (click)="toggleUsuario(u)">
+                  {{ u.activo ? 'Activo' : 'Inactivo' }}
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Ventas por sucursal (últimos 30 días) -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">Ventas últimos 30 días</h3>
+        @if (detalle.totales_sucursal.length === 0) {
+          <p class="drawer-empty">Sin ventas en este periodo.</p>
+        } @else {
+          <table class="mini-table">
+            <thead>
+              <tr><th>Sucursal</th><th>Ventas</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              @for (t of detalle.totales_sucursal; track t.nombre_sucursal) {
+                <tr>
+                  <td>{{ t.nombre_sucursal }}</td>
+                  <td>{{ t.conteo }}</td>
+                  <td class="money">{{ t.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <!-- Ventas recientes -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">Últimas ventas</h3>
+        @if (detalle.ventas_recientes.length === 0) {
+          <p class="drawer-empty">Sin ventas recientes.</p>
+        } @else {
+          <table class="mini-table">
+            <thead>
+              <tr><th>Folio</th><th>Fecha</th><th>Tipo pago</th><th>Total</th></tr>
+            </thead>
+            <tbody>
+              @for (v of detalle.ventas_recientes; track v.venta_id) {
+                <tr>
+                  <td style="font-family:monospace;font-size:11px">{{ v.folio }}</td>
+                  <td>{{ v.fecha | date:'dd/MM HH:mm' }}</td>
+                  <td>{{ v.tipo_pago }}</td>
+                  <td class="money">{{ v.total | currency:'MXN':'symbol-narrow':'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <!-- Movimientos de inventario -->
+      <div class="drawer-section">
+        <h3 class="drawer-section-title">Últimos movimientos de inventario</h3>
+        @if (detalle.movimientos.length === 0) {
+          <p class="drawer-empty">Sin movimientos recientes.</p>
+        } @else {
+          <table class="mini-table">
+            <thead>
+              <tr><th>Producto</th><th>Tipo</th><th>Cant.</th><th>Motivo</th><th>Fecha</th></tr>
+            </thead>
+            <tbody>
+              @for (m of detalle.movimientos; track m.movimiento_id) {
+                <tr>
+                  <td>{{ m.nombre_producto || '—' }}</td>
+                  <td>
+                    <span class="mov-badge" [ngClass]="m.tipo_movimiento === 'ENTRADA' ? 'mov-entrada' : 'mov-salida'">
+                      {{ m.tipo_movimiento }}
+                    </span>
+                  </td>
+                  <td>{{ m.cantidad }}</td>
+                  <td style="font-size:11px;color:#888">{{ m.motivo || '—' }}</td>
+                  <td style="font-size:11px">{{ m.fecha | date:'dd/MM HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+    }
+  </div>
+}

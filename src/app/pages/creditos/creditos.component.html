@@ -1,0 +1,96 @@
+<div class="page-container">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">Créditos</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-hora">{{ hora }}</span>
+      <span class="topbar-empresa">{{ nombreNegocio }}</span>
+      <app-topbar-perfil></app-topbar-perfil>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="toolbar">
+      <h2>Cuentas por Cobrar</h2>
+      @if (creditos.length > 0) {
+        <div class="resumen-pendiente">
+          Total pendiente: <strong>{{ totalPendiente | currency:'MXN':'symbol-narrow' }}</strong>
+        </div>
+      }
+    </div>
+
+    @if (cargando) {
+      <div class="estado-vacio">Cargando...</div>
+    } @else if (creditos.length === 0) {
+      <div class="estado-vacio">
+        <p>✅ Sin cuentas pendientes</p>
+        <small>Todas las ventas a crédito han sido saldadas</small>
+      </div>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Folio</th>
+              <th>Cliente</th>
+              <th class="text-right">Total venta</th>
+              <th class="text-right">Saldo pendiente</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of creditos; track c.venta_id) {
+              <tr>
+                <td>{{ formatearFecha(c.fecha) }}</td>
+                <td>{{ c.folio }}</td>
+                <td>{{ c.nombre_cliente || 'Sin nombre' }}</td>
+                <td class="text-right">{{ c.total | currency:'MXN':'symbol-narrow' }}</td>
+                <td class="text-right saldo-pendiente">{{ c.saldo_pendiente | currency:'MXN':'symbol-narrow' }}</td>
+                <td>
+                  <button class="btn-pago" (click)="abrirPago(c)">💵 Registrar pago</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal pago -->
+@if (modalPago) {
+  <div class="modal-overlay" (click)="modalPago = null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>Registrar pago</h3>
+
+      <div class="info-credito">
+        <div><span>Cliente:</span> <strong>{{ modalPago.nombre_cliente || 'Sin nombre' }}</strong></div>
+        <div><span>Folio:</span> {{ modalPago.folio }}</div>
+        <div><span>Saldo pendiente:</span> <strong class="saldo-pendiente">{{ modalPago.saldo_pendiente | currency:'MXN':'symbol-narrow' }}</strong></div>
+      </div>
+
+      <div class="campo">
+        <label>Monto del pago</label>
+        <input type="number" [(ngModel)]="montoPago" min="0.01"
+          [max]="modalPago.saldo_pendiente" step="0.01">
+      </div>
+      <div class="campo">
+        <label>Notas (opcional)</label>
+        <input type="text" [(ngModel)]="notasPago" placeholder="Efectivo, transferencia, etc.">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="modalPago = null">Cancelar</button>
+        <button class="btn-primary" (click)="registrarPago()"
+          [disabled]="montoPago <= 0 || guardandoPago">
+          {{ guardandoPago ? 'Guardando...' : 'Confirmar pago' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

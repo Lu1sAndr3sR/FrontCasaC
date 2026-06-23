@@ -1,14 +1,8 @@
 html, body { overflow-x: hidden; }
 
-:root {
-  --fondo-negro: #212529;
-  --tarjeta: #1a1a1a;
-  --texto: #ffffff;
-  --acento: #4cc9f0;
-  --borde: #333;
-}
+.vacio-msg { text-align: center; padding: 40px; color: #888; font-size: 15px; }
 
-body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', sans-serif; }
+body { margin: 0; background: #212529; font-family: 'Montserrat', sans-serif; }
 
 .window {
   max-width: 100%;
@@ -16,16 +10,17 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: #212529;
 }
 
 /* ===== Barra superior ===== */
 .topbar {
-  width: 100%; height: 60px; background: #212529;
+  width: 100%; height: 60px; background: var(--topbar);
   display: flex; align-items: center; padding: 0 20px;
   border-bottom: 2px solid #2d2d2d;
 }
 
-.logo { width: 140px; cursor: pointer; transition: 0.25s; margin-left: 50px; }
+.logo { height: 60px; width: auto; max-width: 160px; object-fit: contain; cursor: pointer; transition: 0.25s; margin-left: 50px; }
 .logo:hover { transform: scale(1.1); }
 
 .topbar-links {
@@ -33,13 +28,13 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 }
 
 .topbar-links button {
-  background: none; border: none; color: var(--texto); font-size: 16px;
+  background: none; border: none; color: #ffffff; font-size: 16px;
   cursor: pointer; transition: 0.2s; position: relative; padding: 4px 6px;
 }
-.topbar-links button:hover { color: var(--acento); }
+.topbar-links button:hover { color: var(--primario); }
 
 /* ===== Contenedor ===== */
-.reportes-container { padding: 20px; color: var(--texto); background: #212529; flex: 1; }
+.reportes-container { padding: 20px; color: #ffffff; background: #212529; flex: 1; }
 
 .reportes-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -50,14 +45,14 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 .filtros-fecha { display: flex; gap: 10px; align-items: center; }
 .filtros-fecha label { font-size: 14px; color: #ccc; }
 .filtros-fecha input {
-  background: var(--tarjeta); border: 1px solid #555;
-  color: var(--texto); padding: 6px; border-radius: 5px; font-size: 14px;
+  background: #1a1a1a; border: 1px solid #555;
+  color: #ffffff; padding: 6px; border-radius: 5px; font-size: 14px;
   color-scheme: dark;
 }
 
 /* ===== PESTAÑAS (TABS) ===== */
 .tabs-container {
-  display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--borde);
+  display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #333;
 }
 
 .tab-btn {
@@ -67,7 +62,7 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 }
 .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
 .tab-btn.active {
-  color: var(--acento); border-bottom: 3px solid var(--acento); font-weight: bold;
+  color: var(--primario); border-bottom: 3px solid var(--primario); font-weight: bold;
 }
 
 /* ===== CARDS ===== */
@@ -77,8 +72,8 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 }
 
 .card {
-  background: var(--tarjeta); padding: 20px; border-radius: 10px;
-  border: 1px solid var(--borde); text-align: center;
+  background: #1a1a1a; padding: 20px; border-radius: 10px;
+  border: 1px solid #333; text-align: center;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 .card h3 { margin: 0; font-size: 16px; color: #ccc; }
@@ -86,17 +81,17 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 
 /* ===== TABLAS ===== */
 .subtitulo {
-  color: #fff; border-left: 4px solid var(--acento); padding-left: 10px; margin: 30px 0 15px 0;
+  color: #fff; border-left: 4px solid var(--primario); padding-left: 10px; margin: 30px 0 15px 0;
 }
 
 .report-table {
-  width: 100%; border-collapse: collapse; background: var(--tarjeta);
-  border-radius: 8px; overflow: hidden; border: 1px solid var(--borde);
+  width: 100%; border-collapse: collapse; background: #1a1a1a;
+  border-radius: 8px; overflow: hidden; border: 1px solid #333;
 }
 
 .report-table th {
   background: #2c2c2c; color: #fff; padding: 12px; text-align: left; font-weight: 600;
-  border-bottom: 2px solid var(--borde);
+  border-bottom: 2px solid #333;
 }
 
 .report-table td {
@@ -105,7 +100,19 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 
 .report-table tr:hover { background: #252525; }
 
-.money { font-family: 'Courier New', monospace; font-weight: bold; color: var(--acento); }
+.money { font-family: 'Courier New', monospace; font-weight: bold; color: var(--primario); }
+
+.badge-sucursal {
+  display: inline-block;
+  background: rgba(76, 217, 111, 0.12);
+  border: 1px solid rgba(76, 217, 111, 0.4);
+  color: #4cd96f;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
 /* GRÁFICAS */
 .graficas-grid {
   display: grid;
@@ -115,10 +122,10 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 }
 
 .grafica-card {
-  background: var(--tarjeta);
+  background: #1a1a1a;
   padding: 20px;
   border-radius: 12px;
-  border: 1px solid var(--borde);
+  border: 1px solid #333;
   box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
 
@@ -132,6 +139,395 @@ body { margin: 0; background: var(--fondo-negro); font-family: 'Montserrat', san
 
 .canvas-container {
   position: relative;
-  height: 300px; /* Altura fija para que no se deforme */
+  height: 300px;
   width: 100%;
 }
+
+/* ===== BOTÓN VER NOTA ===== */
+.btn-ver-nota {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-ver-nota:hover:not(:disabled) { border-color: var(--primario); color: var(--primario); }
+.btn-ver-nota:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== TICKET (NOTA DE VENTA) ===== */
+.ticket-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ticket-print {
+  background: #fff;
+  width: 320px;
+  padding: 22px 20px 16px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: #111;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.ticket-header { text-align: center; margin-bottom: 6px; }
+.ticket-logo { height: 50px; width: auto; max-width: 140px; object-fit: contain; margin-bottom: 4px; }
+.ticket-negocio { font-size: 17px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+.ticket-sep { color: #555; font-size: 12px; margin: 6px 0; }
+.ticket-datos { margin: 4px 0; }
+.ticket-dato-row { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 12px; }
+
+.ticket-tabla { width: 100%; border-collapse: collapse; font-size: 12px; margin: 4px 0; }
+.ticket-tabla th { border-bottom: 1px solid #ccc; padding: 3px 2px; text-align: left; font-size: 11px; }
+.ticket-tabla td { padding: 3px 2px; border-bottom: 1px dashed #e0e0e0; vertical-align: top; }
+.col-nombre { width: 45%; }
+.col-num { width: 18%; text-align: right; }
+
+.ticket-total { font-size: 18px; font-weight: bold; text-align: right; padding: 4px 0; letter-spacing: 1px; }
+.ticket-gracias { text-align: center; font-size: 12px; color: #555; margin: 8px 0 12px; }
+
+.ticket-acciones { display: flex; gap: 10px; margin-top: 14px; }
+.btn-imprimir {
+  flex: 1;
+  padding: 10px;
+  background: var(--topbar);
+  color: var(--primario);
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 1px;
+}
+.btn-imprimir:hover { opacity: 0.88; }
+.btn-cerrar-ticket {
+  padding: 10px 18px;
+  background: transparent;
+  color: var(--peligro);
+  border: 1px solid var(--peligro);
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+}
+.btn-cerrar-ticket:hover { background: var(--peligro); color: #fff; }
+
+/* ===== BADGES ESTADO CFDI ===== */
+.cfdi-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.badge-pendiente { background: rgba(244,162,97,0.2);  color: #f4a261; border: 1px solid #f4a261; }
+.badge-timbrado  { background: rgba(76,217,111,0.18); color: #4cd96f; border: 1px solid #4cd96f; }
+.badge-cancelado { background: rgba(209,11,11,0.15);  color: #ff5f5f; border: 1px solid #ff5f5f; }
+
+/* ===== BOTONES ACCIONES CFDI ===== */
+.cfdi-acciones { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+.btn-cfdi {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.btn-cfdi:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-timbrar       { background: #f4a261; color: #fff; }
+.btn-timbrar:hover:not(:disabled) { background: #e08a40; }
+
+.btn-xml           { background: #4cc9f0; color: #111; }
+.btn-xml:hover     { background: #31b4da; }
+
+.btn-pdf           { background: #7c5cbf; color: #fff; }
+.btn-pdf:hover     { background: #6347a8; }
+
+.btn-cancelar-cfdi { background: transparent; color: #ff5f5f; border: 1px solid #ff5f5f; }
+.btn-cancelar-cfdi:hover:not(:disabled) { background: #ff5f5f; color: #fff; }
+
+.btn-email { background: transparent; color: #aaa; border: 1px solid #555; font-size: 14px; }
+.btn-email:hover:not(:disabled) { border-color: #4cc9f0; color: #4cc9f0; }
+
+/* ===== MODAL CANCELAR CFDI ===== */
+.modal-overlay-cfdi {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.modal-cfdi {
+  background: #2a2d32;
+  width: 460px;
+  max-width: 95vw;
+  border-radius: 8px;
+  padding: 26px 28px 22px;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+  color: #f0f0f0;
+}
+
+.modal-cfdi-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff5f5f;
+  margin: 0 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #3a3d42;
+}
+
+.modal-cfdi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  color: #ccc;
+}
+.modal-cfdi-info span { color: #888; margin-right: 6px; }
+.modal-cfdi-info strong { color: #fff; }
+
+.modal-cfdi-field { margin-bottom: 18px; }
+
+.modal-cfdi-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.modal-cfdi-field select {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  background: #1e2227;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #f0f0f0;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+}
+
+.modal-cfdi-acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn-cfdi-cancel {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  color: #888;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+.btn-cfdi-cancel:hover { border-color: #aaa; color: #fff; }
+
+.btn-cfdi-confirm {
+  flex: 2;
+  padding: 10px;
+  background: #d10b0b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+.btn-cfdi-confirm:hover:not(:disabled) { background: #a80909; }
+.btn-cfdi-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== MODAL TIMBRAR (datos fiscales) ===== */
+.modal-cfdi-timbrar { width: 560px; }
+
+.modal-timbrar-titulo { color: var(--primario) !important; }
+
+.modal-cfdi-field input {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  background: #1e2227;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #f0f0f0;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  box-sizing: border-box;
+}
+.modal-cfdi-field input:focus,
+.modal-cfdi-field select:focus { outline: none; border-color: var(--primario); }
+
+.rfc-row { display: flex; gap: 8px; }
+.rfc-row input { flex: 1; }
+
+.btn-buscar-rfc {
+  padding: 0 16px;
+  height: 40px;
+  background: var(--primario);
+  color: #111;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-buscar-rfc:hover:not(:disabled) { opacity: 0.85; }
+.btn-buscar-rfc:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cliente-badge {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--primario);
+  font-weight: 600;
+}
+
+.cfdi-row-2 {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 12px;
+}
+
+.cfdi-guardar-row { margin: 6px 0 18px; }
+
+.cfdi-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #aaa;
+  cursor: pointer;
+}
+.cfdi-check-label input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primario); }
+
+.btn-timbrar-confirm {
+  background: var(--primario) !important;
+  color: #111 !important;
+}
+
+/* === TAB IA === */
+.tab-ia { background: linear-gradient(135deg, #4a00e0, #8e2de2) !important; color: #fff !important; }
+.tab-ia.active { box-shadow: 0 0 10px rgba(142,45,226,0.5); }
+
+.ia-tab-content { padding: 10px 0; }
+
+.ia-no-key {
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed #555;
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+  color: #aaa;
+  font-size: 15px;
+}
+.ia-no-key strong { color: #c78cf7; }
+
+.ia-seccion { display: flex; flex-direction: column; gap: 20px; }
+
+.ia-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(142,45,226,0.3);
+  border-radius: 10px;
+  padding: 20px 24px;
+}
+.ia-card h3 { margin: 0 0 6px 0; color: #c78cf7; font-size: 16px; }
+.ia-desc { color: #aaa; font-size: 13px; margin: 0 0 14px 0; }
+
+.btn-ia-accion {
+  background: linear-gradient(135deg, #4a00e0, #8e2de2);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.btn-ia-accion:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-ia-accion:hover:not(:disabled) { opacity: 0.85; }
+.btn-anomalias { background: linear-gradient(135deg, #c0392b, #e74c3c) !important; }
+
+.ia-resultado {
+  margin-top: 16px;
+  background: rgba(0,0,0,0.3);
+  border-left: 3px solid #8e2de2;
+  border-radius: 6px;
+  padding: 14px 18px;
+}
+.ia-texto {
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 13px;
+  color: #e0e0e0;
+  margin: 0;
+  line-height: 1.65;
+}
+.ia-error {
+  margin-top: 10px;
+  background: rgba(209,11,11,0.12);
+  border: 1px solid #d10b0b;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #ff6b6b;
+  font-size: 13px;
+}
+
+/* ===== Exportar ===== */
+.export-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+  padding: 0 4px;
+}
+
+.btn-export {
+  background: #198754;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-export:hover { background: #157347; }
+.btn-export.btn-pdf { background: #c0392b; }
+.btn-export.btn-pdf:hover { background: #a93226; }

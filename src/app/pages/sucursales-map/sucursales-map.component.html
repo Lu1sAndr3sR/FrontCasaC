@@ -1,0 +1,54 @@
+<div class="mapa-page">
+  <div class="mapa-header">
+    <button class="btn-volver" routerLink="/dashboard">← Dashboard</button>
+    <h2>Sucursales</h2>
+    <button class="btn-nueva" routerLink="/sucursales/nueva">+ Nueva sucursal</button>
+  </div>
+
+  <div class="mapa-layout">
+    <div class="mapa-sidebar">
+      <h3>Mis sucursales</h3>
+      @if (cargando) {
+        <p class="loading">Cargando...</p>
+      }
+      @for (s of sucursales; track s.sucursal_id) {
+        <div class="sucursal-card" [class.activa]="s.sucursal_id === sucursalActualId">
+
+          <div class="sucursal-logo-row">
+            @if (s.logo_b64) {
+              <img [src]="s.logo_b64" class="sucursal-logo-preview" alt="logo">
+            } @else {
+              <div class="sucursal-logo-placeholder">Sin logo</div>
+            }
+            <div class="sucursal-logo-acciones">
+              <label class="btn-logo" [class.cargando]="guardandoLogo === s.sucursal_id">
+                @if (guardandoLogo === s.sucursal_id) {
+                  <span>...</span>
+                } @else {
+                  <span>{{ s.logo_b64 ? '🔄' : '📷' }}</span>
+                }
+                <input type="file" accept="image/png,image/jpeg,image/webp"
+                  (change)="onLogoSeleccionado($event, s)" style="display:none">
+              </label>
+              @if (s.logo_b64) {
+                <button class="btn-quitar-logo" (click)="quitarLogo(s)"
+                  [disabled]="guardandoLogo === s.sucursal_id" title="Quitar logo">✕</button>
+              }
+            </div>
+          </div>
+
+          <div class="sucursal-nombre">
+            {{ s.nombre }}
+            @if (s.sucursal_id === sucursalActualId) {
+              <span class="badge-actual">Tu sucursal</span>
+            }
+          </div>
+          <div class="sucursal-dir">{{ s.direccion || 'Sin dirección' }}</div>
+          <div class="sucursal-cp">CP SAT: {{ s.cp_sat }}</div>
+        </div>
+      }
+    </div>
+
+    <div id="mapa-sucursales"></div>
+  </div>
+</div>

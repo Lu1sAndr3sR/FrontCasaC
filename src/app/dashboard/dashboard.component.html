@@ -15,11 +15,53 @@
       <p class="bar-label">Nueva Venta</p>
     </div>
 
-
     <!-- Inventario -->
     <div class="bar-item" (click)="goInventario()">
       <img src="assets/Inventario.png" class="bar-icon" alt="inventario">
       <p class="bar-label">Inventario</p>
+    </div>
+
+    <!-- Sucursales (gestión) — solo admin -->
+    <div class="bar-item" *ngIf="esAdmin" (click)="goSucursales()">
+      <div class="bar-icon-emoji">🏬</div>
+      <p class="bar-label">Sucursales</p>
+    </div>
+
+    <!-- Selector sucursal activa — admin: puede cambiar; empleado: solo lectura -->
+    <div class="bar-item"
+         [class.suc-readonly]="!esAdmin"
+         (click)="esAdmin ? abrirSelectorSucursal() : null"
+         [title]="esAdmin ? 'Cambiar sucursal activa' : 'Sucursal asignada'">
+      <div class="suc-chip-bar">
+        <span>📍</span>
+        <span class="suc-nombre-chip">{{ sucursalActivaService.sucursalActiva?.nombre || 'Sin sucursal' }}</span>
+        <span *ngIf="esAdmin">▾</span>
+      </div>
+      <p class="bar-label">{{ esAdmin ? 'Activa' : 'Mi sucursal' }}</p>
+    </div>
+
+    <!-- Proveedores -->
+    <div class="bar-item" (click)="goProveedores()">
+      <div class="bar-icon-emoji">🏭</div>
+      <p class="bar-label">Proveedores</p>
+    </div>
+
+    <!-- Compras -->
+    <div class="bar-item" (click)="goCompras()">
+      <div class="bar-icon-emoji">🛒</div>
+      <p class="bar-label">Compras</p>
+    </div>
+
+    <!-- Devoluciones -->
+    <div class="bar-item" (click)="goDevoluciones()">
+      <div class="bar-icon-emoji">↩</div>
+      <p class="bar-label">Devoluciones</p>
+    </div>
+
+    <!-- Cotizaciones -->
+    <div class="bar-item" (click)="goCotizaciones()">
+      <div class="bar-icon-emoji">📋</div>
+      <p class="bar-label">Cotizaciones</p>
     </div>
 
     <!-- Reportes -->
@@ -34,46 +76,73 @@
       <p class="bar-label">Notificaciones</p>
     </div>
 
-    <!-- Usuario -->
-    <div class="bar-item" (click)="toggleUserMenu()">
-      <img src="assets/UserI.png" class="bar-icon" alt="useri">
-      <p class="bar-label">Usuario</p>
+    <!-- Avatar de perfil -->
+    <div class="bar-item bar-item-avatar">
+      <app-topbar-perfil></app-topbar-perfil>
+      <p class="bar-label">Perfil</p>
     </div>
 
-    <!-- Popup del usuario (perfil directo) -->
-    <div class="user-popup" *ngIf="showUserMenu">
-      <div class="user-profile">
+  </div>
 
-        <!-- Foto del usuario -->
-        <img src="assets/UserI.png" class="user-photo" alt="user">
-
-        <!-- Nombre -->
-        <h4 class="username">{{ usuarioNombre }}</h4>
-
-        <!-- Fecha -->
-        <p class="info">Fecha: {{ fechaActual }}</p>
-
-        <!-- Hora -->
-        <p class="info">Hora: {{ horaActual }}</p>
-
-        <!-- Botón cerrar sesión -->
-        <button class="logout-btn" (click)="cerrarSesion()">Cerrar sesión</button>
-
-      </div>
+  <!-- --- KPIs del día --- -->
+  <div class="kpi-bar">
+    <div class="kpi-chip">
+      <span class="kpi-chip-icon">💰</span>
+      <span class="kpi-chip-valor">{{ kpiCargando ? '…' : ('$' + (kpiVentasHoy | number:'1.2-2')) }}</span>
+      <span class="kpi-chip-label">Ventas hoy</span>
     </div>
+    <div class="kpi-chip" [class.kpi-chip-alerta]="kpiStockBajo > 0" (click)="goInventario()">
+      <span class="kpi-chip-icon">📦</span>
+      <span class="kpi-chip-valor">{{ kpiCargando ? '…' : kpiStockBajo }}</span>
+      <span class="kpi-chip-label">Stock bajo</span>
+    </div>
+    <div class="kpi-chip" [class.kpi-chip-alerta]="kpiDevolucionesHoy > 0" (click)="goDevoluciones()">
+      <span class="kpi-chip-icon">↩</span>
+      <span class="kpi-chip-valor">{{ kpiCargando ? '…' : kpiDevolucionesHoy }}</span>
+      <span class="kpi-chip-label">Devoluciones hoy</span>
+    </div>
+    <div class="kpi-chip" [class.kpi-chip-ok]="cajaAbierta" [class.kpi-chip-cerrada]="!cajaAbierta">
+      <span class="kpi-chip-icon">{{ cajaAbierta ? '🔓' : '🔒' }}</span>
+      <span class="kpi-chip-valor">{{ cajaAbierta ? 'Abierta' : 'Cerrada' }}</span>
+      <span class="kpi-chip-label">Caja</span>
+    </div>
+  </div>
 
+  <!-- --- ONBOARDING (solo si no está completo) --- -->
+  <div *ngIf="onboarding" class="onboarding-card">
+    <div class="onboarding-header">
+      <span class="onboarding-titulo">Primeros pasos — {{ onboarding.progreso }}/{{ onboarding.total }}</span>
+      <button class="onboarding-cerrar" (click)="onboarding = null" title="Ocultar">✕</button>
+    </div>
+    <div class="onboarding-barra">
+      <div class="onboarding-progreso" [style.width.%]="(onboarding.progreso / onboarding.total) * 100"></div>
+    </div>
+    <ul class="onboarding-lista">
+      <li *ngFor="let paso of onboarding.pasos" [class.completado]="paso.completado">
+        <span class="paso-icono">{{ paso.completado ? '✓' : '○' }}</span>
+        <span class="paso-label">{{ paso.label }}</span>
+        <button *ngIf="!paso.completado && paso.id === 2" class="paso-btn" (click)="goUsuarios()">Configurar</button>
+        <button *ngIf="!paso.completado && paso.id === 3" class="paso-btn" (click)="goInventario()">Ir a inventario</button>
+        <button *ngIf="!paso.completado && paso.id === 4" class="paso-btn" (click)="goUsuarios()">Agregar usuario</button>
+        <button *ngIf="!paso.completado && paso.id === 5" class="paso-btn" (click)="goCaja()">Hacer venta</button>
+      </li>
+    </ul>
   </div>
 
   <!-- --- SECCIÓN INFERIOR (logo + ajustes) --- -->
   <div class="bottom-area">
     <div class="logo-container">
-      <img src="assets/logoC.png" alt="Logo">
+      <img [src]="negocioService.logoActivo" alt="Logo">
     </div>
-
     <div class="settings-icon" (click)="goUsuarios()">⚙️</div>
   </div>
 
 </div>
+
+<!-- Modal selector de sucursal -->
+@if (showSucursal) {
+  <app-selector-sucursal (cerrado)="cerrarSelectorSucursal()"></app-selector-sucursal>
+}
 <div class="modal-overlay" *ngIf="!cajaAbierta">
   <div class="modal-caja">
     <div style="font-size: 50px; margin-bottom: 15px;">🔒</div>
@@ -84,9 +153,9 @@
 
     <div class="input-dinero-wrapper">
       <span style="font-size: 24px; font-weight: bold; color: #555;">$</span>
-      <input type="number" 
-             [(ngModel)]="montoApertura" 
-             placeholder="0.00" 
+      <input type="number"
+             [(ngModel)]="montoApertura"
+             placeholder="0.00"
              (keyup.enter)="confirmarApertura()"
              autofocus>
     </div>

@@ -1,15 +1,44 @@
+:root {
+  --topbar: #1e2227;
+  --primario: #4cd96f;
+  --primario-dark: #3cb35a;
+  --peligro: #d10b0b;
+  --peligro-dark: #a80909;
+}
+
 html, body {
   height: 100%;
   margin: 0;
   font-family: 'Bebas Neue', sans-serif !important;
 }
 
-body, 
-.mat-typography, 
-.mat-form-field, 
-.mat-form-field-label, 
-.mat-input-element, 
-button.mat-raised-button, 
+body,
+.mat-typography,
+.mat-form-field,
+.mat-form-field-label,
+.mat-input-element,
+button.mat-raised-button,
 button.mat-button {
   font-family: 'Bebas Neue', sans-serif !important;
+}
+
+@media print {
+  .no-print { display: none !important; }
+
+  /* MODO TICKET — solo cuando se agrega print-ticket al body explícitamente */
+  body.print-ticket * { visibility: hidden; }
+  body.print-ticket .ticket-print,
+  body.print-ticket .ticket-print * { visibility: visible; }
+  body.print-ticket .ticket-print {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 72mm !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    padding: 4mm !important;
+    box-shadow: none !important;
+  }
+
 }
