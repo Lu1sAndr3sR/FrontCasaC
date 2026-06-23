@@ -64,9 +64,7 @@ export class AltaSucursalComponent implements AfterViewInit, OnDestroy {
           this.colonias = cols;
           this.cpValido = cols.length > 0;
           this.buscandoCp = false;
-          if (!this.cpValido) {
-            this.toastService.show('CP no registrado en SAT — puedes guardar igual (solo se requiere para facturación)', 'info');
-          }
+          // CP no en SAT: solo muestra colonias si las hay, no bloquea
           this.centrarMapaPorCp(this.form.cp_sat.trim());
         },
         error: () => { this.buscandoCp = false; }
