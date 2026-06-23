@@ -31,7 +31,7 @@ export class CortecajaComponent implements OnInit, OnDestroy {
   montoInicial: number = 0;
   entradaDinero: number = 0;
   salidaEfectivo: number = 0;
-  totalDevoluciones: number = 0;
+
   totalVentas: number = 0;
 
   montoFinal: number | null = null;
@@ -85,11 +85,10 @@ export class CortecajaComponent implements OnInit, OnDestroy {
   cargarDatosCorte() {
     this.cajaService.obtenerTotales(this.cajaId).subscribe({
       next: (data) => {
-        this.montoInicial       = Number(data.montoInicial)      || 0;
-        this.totalVentas        = Number(data.totalVentas)       || 0;
-        this.entradaDinero      = Number(data.totalIngresos)     || 0;
-        this.salidaEfectivo     = Number(data.totalEgresos)      || 0;
-        this.totalDevoluciones  = Number(data.totalDevoluciones) || 0;
+        this.montoInicial   = Number(data.montoInicial)  || 0;
+        this.totalVentas    = Number(data.totalVentas)   || 0;
+        this.entradaDinero  = Number(data.totalIngresos) || 0;
+        this.salidaEfectivo = Number(data.totalEgresos)  || 0; // incluye EGRESO + DEVOLUCION
       },
       error: () => {
         this.toastService.show('Error al cargar datos del corte.', 'error');
@@ -98,7 +97,7 @@ export class CortecajaComponent implements OnInit, OnDestroy {
   }
 
   get montoEsperado(): number {
-    return this.montoInicial + this.totalVentas + this.entradaDinero - this.salidaEfectivo - this.totalDevoluciones;
+    return this.montoInicial + this.totalVentas + this.entradaDinero - this.salidaEfectivo;
   }
 
   get diferencia(): number {

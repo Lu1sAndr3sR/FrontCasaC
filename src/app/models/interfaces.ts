@@ -127,7 +127,6 @@ export interface TotalesCaja {
   totalVentas: number;
   totalIngresos: number;
   totalEgresos: number;
-  totalDevoluciones: number;
   montoEsperado: number;
   fecha_apertura: string;
 }
