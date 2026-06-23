@@ -64,7 +64,10 @@ export class AltaSucursalComponent implements AfterViewInit, OnDestroy {
           this.colonias = cols;
           this.cpValido = cols.length > 0;
           this.buscandoCp = false;
-          if (!this.cpValido) this.toastService.show('CP no encontrado en catálogo SAT', 'error');
+          if (!this.cpValido) {
+            this.toastService.show('CP no registrado en SAT — puedes guardar igual (solo se requiere para facturación)', 'info');
+          }
+          this.centrarMapaPorCp(this.form.cp_sat.trim());
         },
         error: () => { this.buscandoCp = false; }
       });
@@ -126,6 +129,20 @@ export class AltaSucursalComponent implements AfterViewInit, OnDestroy {
         this.guardando = false;
       }
     });
+  }
+
+  private centrarMapaPorCp(cp: string): void {
+    if (!cp || cp.length !== 5) return;
+    fetch(`https://nominatim.openstreetmap.org/search?postalcode=${cp}&country=MX&format=json&limit=1`)
+      .then(r => r.json())
+      .then((results: any[]) => {
+        if (results.length > 0) {
+          const lat = parseFloat(results[0].lat);
+          const lng = parseFloat(results[0].lon);
+          this.mapaSelector.setView([lat, lng], 13);
+        }
+      })
+      .catch(() => {});
   }
 
   ngOnDestroy(): void {
