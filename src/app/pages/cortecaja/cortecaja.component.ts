@@ -97,7 +97,7 @@ export class CortecajaComponent implements OnInit, OnDestroy {
   }
 
   get montoEsperado(): number {
-    return this.montoInicial + this.totalVentas + this.entradaDinero - this.salidaEfectivo;
+    return this.montoInicial + this.totalVentas - this.salidaEfectivo;
   }
 
   get diferencia(): number {
