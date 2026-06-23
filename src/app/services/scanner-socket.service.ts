@@ -7,12 +7,17 @@ export class ScannerSocketService implements OnDestroy {
   private socket: Socket;
 
   constructor() {
-    this.socket = io(window.location.origin, { autoConnect: false });
+    this.socket = io(window.location.origin, {
+      autoConnect: false,
+      reconnectionAttempts: 4,
+      reconnectionDelay: 3000,
+    });
 
-    this.socket.on('disconnect', (reason) =>
-      console.warn('[Scanner] Socket desconectado:', reason));
-    this.socket.on('connect_error', (err) =>
-      console.error('[Scanner] Error de conexión:', err.message));
+    this.socket.on('disconnect', (reason) => {
+      if (reason !== 'io client disconnect') console.warn('[Scanner] Socket desconectado:', reason);
+    });
+    this.socket.io.on('reconnect_failed', () =>
+      console.warn('[Scanner] No se pudo conectar al servidor de escáner (servidor dormido o no disponible)'));
   }
 
   unirseACaja(salaId: string): void {
