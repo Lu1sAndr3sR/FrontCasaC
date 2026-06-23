@@ -19,13 +19,23 @@
       <div class="panel-inner">
 
         <div class="cards-row">
-          
+
           <div class="card small-card">
             <div class="card-title">Monto Inicial</div>
             <div class="card-body">
               <div class="input-with-symbol">
                 <span class="sym">$</span>
                 <input type="text" [value]="montoInicial | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card small-card">
+            <div class="card-title">Ventas del Día</div>
+            <div class="card-body">
+              <div class="input-with-symbol">
+                <span class="sym">$</span>
+                <input type="text" [value]="totalVentas | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
               </div>
             </div>
           </div>
@@ -41,16 +51,13 @@
           </div>
 
           <div class="card small-card">
-            <div class="card-title">Salida de Efectivo (Registrada)</div>
+            <div class="card-title">Salida de Efectivo</div>
             <div class="card-body">
               <div class="input-with-symbol">
                 <span class="sym">$</span>
                 <input type="text" [value]="salidaEfectivo | number:'1.2-2'" readonly style="background-color: #eee; cursor: not-allowed;" />
               </div>
             </div>
-            <small style="color:#888;font-size:11px;padding:4px 0;display:block;text-align:center">
-              Registra salidas desde Compras
-            </small>
           </div>
 
           <div class="card small-card">
@@ -58,6 +65,9 @@
             <div class="card-body">
               <div class="monto-display">$ {{ montoEsperado | number:'1.2-2' }}</div>
             </div>
+            <small style="color:#888;font-size:11px;padding:4px 0;display:block;text-align:center">
+              Inicial + Ventas + Entradas − Salidas
+            </small>
           </div>
         </div>
 
